@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 0.1a\n"
 "Report-Msgid-Bugs-To: openedx-translation@googlegroups.com\n"
-"POT-Creation-Date: 2014-02-11 18:19-0500\n"
-"PO-Revision-Date: 2014-02-11 23:20:19.199916\n"
+"POT-Creation-Date: 2014-02-14 10:46-0800\n"
+"PO-Revision-Date: 2014-02-14 18:46:44.549653\n"
 "Last-Translator: \n"
 "Language-Team: openedx-translation <openedx-translation@googlegroups.com>\n"
 "MIME-Version: 1.0\n"
@@ -1149,6 +1149,15 @@ msgstr "Lïst ïtém #"
 #: lms/static/js/Markdown.Editor.js
 msgid "Heading"
 msgstr "Héädïng #"
+
+#: lms/templates/class_dashboard/all_section_metrics.js
+#: lms/templates/class_dashboard/all_section_metrics.js
+msgid "Unable to retrieve data, please try again later."
+msgstr "Ûnäßlé tö rétrïévé dätä, pléäsé trý ägäïn lätér. Ⱡ'σяєм ιρѕυм #"
+
+#: lms/templates/class_dashboard/d3_stacked_bar_graph.js
+msgid "Number of Students"
+msgstr "Nümßér öf Stüdénts Ⱡ'σ#"
 
 #: cms/static/coffee/src/main.js
 msgid ""
