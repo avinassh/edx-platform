@@ -1,6 +1,6 @@
 @shard_3
-Feature: CMS.Transcripts
-  As a course author, I want to be able to create video components.
+Feature: CMS Transcripts
+  As a course author, I want to be able to create video components
 
     # For transcripts acceptance tests there are 3 available caption
     # files. They can be used to test various transcripts features. Two of
@@ -495,7 +495,7 @@ Feature: CMS.Transcripts
         And I see value "video_name_2" in the field "HTML5 Transcript"
 
     #27
-    Scenario: Upload button for single youtube id.
+    Scenario: Upload button for single youtube id
         Given I have created a Video component
         And I edit the component
 
@@ -512,7 +512,7 @@ Feature: CMS.Transcripts
         Then I see status message "found"
 
     #28
-    Scenario: Upload button for youtube id with html5 ids.
+    Scenario: Upload button for youtube id with html5 ids
         Given I have created a Video component
         And I edit the component
 
@@ -609,13 +609,16 @@ Feature: CMS.Transcripts
 
     #33
     Scenario: After clearing Transcripts field in the Advanced tab "not found" message should be visible with saving
-        Given I have created a Video component with subtitles "t_not_exist"
+        Given I have created a Video component
         And I edit the component
 
         And I enter a "t_not_exist.mp4" source to field number 1
-        Then I see status message "found"
+        Then I see status message "not found"
+        And I upload the transcripts file "chinese_transcripts.srt"
+        Then I see status message "uploaded_successfully"
 
         And I save changes
+        Then I see "好 各位同学" text in the captions
         And I edit the component
 
         And I open tab "Advanced"

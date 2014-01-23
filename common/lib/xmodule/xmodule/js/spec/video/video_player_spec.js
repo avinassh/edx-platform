@@ -39,8 +39,8 @@
                     expect(state.videoCaption).toBeDefined();
                     expect(state.youtubeId('1.0')).toEqual('Z5KLxerq05Y');
                     expect(state.speed).toEqual('1.50');
-                    expect(state.config.captionAssetPath)
-                        .toEqual('/static/subs/');
+                    expect(state.config.transcriptTranslationUrl)
+                        .toEqual('/transcript/translation');
                 });
 
                 it('create video speed control', function () {
@@ -442,13 +442,13 @@
                 });
 
                 it('video has a correct speed', function () {
-                    spyOn(state.videoPlayer, 'onSpeedChange');
+                    spyOn(state.videoPlayer, 'setPlaybackRate');
                     state.speed = '2.0';
                     state.videoPlayer.onPlay();
-                    expect(state.videoPlayer.onSpeedChange)
+                    expect(state.videoPlayer.setPlaybackRate)
                         .toHaveBeenCalledWith('2.0');
                     state.videoPlayer.onPlay();
-                    expect(state.videoPlayer.onSpeedChange.calls.length).toEqual(1);
+                    expect(state.videoPlayer.setPlaybackRate.calls.length).toEqual(1);
                 });
 
                 it('video has a correct volume', function () {

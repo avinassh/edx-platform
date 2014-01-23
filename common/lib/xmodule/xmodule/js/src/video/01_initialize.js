@@ -57,9 +57,11 @@ function (VideoPlayer, VideoStorage) {
                     });
             });
     },
+
     methodsDict = {
         bindTo: bindTo,
         fetchMetadata: fetchMetadata,
+        getCurrentLanguage: getCurrentLanguage,
         getDuration: getDuration,
         getVideoMetadata: getVideoMetadata,
         initialize: initialize,
@@ -305,6 +307,11 @@ function (VideoPlayer, VideoStorage) {
                             value ||
                             '1.0';
                      },
+                    'transcriptLanguage': function (value) {
+                        return storage.getItem('language') ||
+                            value ||
+                            'en';
+                     },
                     'ytTestTimeout': function (value) {
                         value = parseInt(value, 10);
 
@@ -432,6 +439,7 @@ function (VideoPlayer, VideoStorage) {
             this.config.endTime = null;
         }
 
+        this.lang = this.config.transcriptLanguage;
         this.speed = Number(
             this.config.speed || this.config.generalSpeed
         ).toFixed(2).replace(/\.00$/, '.0');
@@ -710,6 +718,14 @@ function (VideoPlayer, VideoStorage) {
         } catch (err) {
             return this.metadata[this.youtubeId('1.0')].duration;
         }
+    }
+
+    function getCurrentLanguage() {
+        if (!_.contains(_.keys(this.config.transcriptLanguages), this.lang)) {
+            this.lang = 'en';
+        }
+
+        return this.lang;
     }
 
     /*

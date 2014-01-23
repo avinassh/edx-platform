@@ -46,6 +46,7 @@ function (HTML5Video, Resizer) {
             onVolumeChange: onVolumeChange,
             pause: pause,
             play: play,
+            setPlaybackRate: setPlaybackRate,
             update: update,
             updatePlayTime: updatePlayTime
         };
@@ -70,7 +71,7 @@ function (HTML5Video, Resizer) {
             $(window).on('unload', state.saveState);
 
             if (state.currentPlayerMode !== 'flash') {
-                state.videoPlayer.onSpeedChange(state.speed);
+                state.videoPlayer.setPlaybackRate(state.speed);
             }
             state.videoPlayer.player.setVolume(state.currentVolume);
         });
@@ -325,32 +326,9 @@ function (HTML5Video, Resizer) {
         }
     }
 
-    function onSpeedChange(newSpeed) {
+    function setPlaybackRate(newSpeed) {
         var time = this.videoPlayer.currentTime,
             methodName, youtubeId;
-
-        if (this.currentPlayerMode === 'flash') {
-            this.videoPlayer.currentTime = Time.convert(
-                time,
-                parseFloat(this.speed),
-                newSpeed
-            );
-        }
-
-        newSpeed = parseFloat(newSpeed).toFixed(2).replace(/\.00$/, '.0');
-
-        if (this.speed != newSpeed) {
-            this.videoPlayer.log(
-                'speed_change_video',
-                {
-                    current_time: time,
-                    old_speed: this.speed,
-                    new_speed: newSpeed
-                }
-            );
-        }
-
-        this.setSpeed(newSpeed, true);
 
         if (
             this.currentPlayerMode === 'html5' &&
@@ -377,7 +355,33 @@ function (HTML5Video, Resizer) {
             this.videoPlayer.player[methodName](youtubeId, time);
             this.videoPlayer.updatePlayTime(time);
         }
+    }
 
+    function onSpeedChange(newSpeed) {
+        var time = this.videoPlayer.currentTime,
+            isFlash = this.currentPlayerMode === 'flash';
+
+        if (isFlash) {
+            this.videoPlayer.currentTime = Time.convert(
+                time,
+                parseFloat(this.speed),
+                newSpeed
+            );
+        }
+
+        newSpeed = parseFloat(newSpeed).toFixed(2).replace(/\.00$/, '.0');
+
+        this.videoPlayer.log(
+            'speed_change_video',
+            {
+                current_time: time,
+                old_speed: this.speed,
+                new_speed: newSpeed
+            }
+        );
+
+        this.setSpeed(newSpeed, true);
+        this.videoPlayer.setPlaybackRate(newSpeed);
         this.el.trigger('speedchange', arguments);
 
         this.saveState(true, { speed: newSpeed });

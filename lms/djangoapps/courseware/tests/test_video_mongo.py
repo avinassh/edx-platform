@@ -6,6 +6,8 @@ import os
 import tempfile
 import textwrap
 from functools import partial
+import json
+from webob import Request
 
 from xmodule.contentstore.content import StaticContent
 from xmodule.modulestore import Location
@@ -13,7 +15,7 @@ from xmodule.contentstore.django import contentstore
 from . import BaseTestXmodule
 from .test_video_xml import SOURCE_XML
 from django.conf import settings
-from xmodule.video_module import _create_youtube_string
+from xmodule.video_module import create_youtube_string
 from cache_toolbox.core import del_cached_content
 from xmodule.exceptions import NotFoundError
 
@@ -40,7 +42,7 @@ class TestVideo(BaseTestXmodule):
             404)
 
     def tearDown(self):
-        _clear_assets(self.item_module.location)
+        _clear_assets(self.item_descriptor.location)
 
 
 class TestVideoYouTube(TestVideo):
@@ -48,7 +50,7 @@ class TestVideoYouTube(TestVideo):
 
     def test_video_constructor(self):
         """Make sure that all parameters extracted correctly from xml"""
-        context = self.item_module.render('student_view').content
+        context = self.item_descriptor.render('student_view').content
 
         sources = {
             'main': u'example.mp4',
@@ -58,12 +60,12 @@ class TestVideoYouTube(TestVideo):
 
         expected_context = {
             'ajax_url': self.item_descriptor.xmodule_runtime.ajax_url + '/save_user_state',
+            'autoplay': settings.FEATURES.get('AUTOPLAY_VIDEOS', False),
             'data_dir': getattr(self, 'data_dir', None),
-            'caption_asset_path': '/static/subs/',
-            'show_captions': 'true',
             'display_name': u'A Name',
             'end': 3610.0,
-            'id': self.item_module.location.html_id(),
+            'id': self.item_descriptor.location.html_id(),
+            'show_captions': 'true',
             'sources': sources,
             'speed': 'null',
             'general_speed': 1.0,
@@ -71,15 +73,18 @@ class TestVideoYouTube(TestVideo):
             'saved_video_position': 0.0,
             'sub': u'a_sub_file.srt.sjson',
             'track': None,
-            'youtube_streams': _create_youtube_string(self.item_module),
-            'autoplay': settings.FEATURES.get('AUTOPLAY_VIDEOS', False),
+            'youtube_streams': create_youtube_string(self.item_descriptor),
             'yt_test_timeout': 1500,
             'yt_test_url': 'https://gdata.youtube.com/feeds/api/videos/',
+            'transcript_language': 'en',
+            'transcript_languages' : '{"uk": "Ukrainian", "en": "English"}',
+            'transcript_translation_url': self.item_descriptor.xmodule_runtime.handler_url(
+                self.item_descriptor, 'transcript'
+            ).rstrip('/?') + '/translation',
         }
-
         self.assertEqual(
             context,
-            self.item_module.xmodule_runtime.render_template('video.html', expected_context),
+            self.item_descriptor.xmodule_runtime.render_template('video.html', expected_context),
         )
 
 
@@ -111,15 +116,14 @@ class TestVideoNonYouTube(TestVideo):
             u'webm': u'example.webm',
         }
 
-        context = self.item_module.render('student_view').content
+        context = self.item_descriptor.render('student_view').content
         expected_context = {
             'ajax_url': self.item_descriptor.xmodule_runtime.ajax_url + '/save_user_state',
             'data_dir': getattr(self, 'data_dir', None),
-            'caption_asset_path': '/static/subs/',
             'show_captions': 'true',
             'display_name': u'A Name',
             'end': 3610.0,
-            'id': self.item_module.location.html_id(),
+            'id': self.item_descriptor.location.html_id(),
             'sources': sources,
             'speed': 'null',
             'general_speed': 1.0,
@@ -131,11 +135,16 @@ class TestVideoNonYouTube(TestVideo):
             'autoplay': settings.FEATURES.get('AUTOPLAY_VIDEOS', True),
             'yt_test_timeout': 1500,
             'yt_test_url': 'https://gdata.youtube.com/feeds/api/videos/',
+            'transcript_language': 'en',
+            'transcript_languages' : '{"en": "English"}',
+            'transcript_translation_url': self.item_descriptor.xmodule_runtime.handler_url(
+                self.item_descriptor, 'transcript'
+            ).rstrip('/?    ') + '/translation',
         }
 
         self.assertEqual(
             context,
-            self.item_module.xmodule_runtime.render_template('video.html', expected_context),
+            self.item_descriptor.xmodule_runtime.render_template('video.html', expected_context),
         )
 
 
@@ -192,7 +201,6 @@ class TestGetHtmlMethod(BaseTestXmodule):
 
         expected_context = {
             'data_dir': getattr(self, 'data_dir', None),
-            'caption_asset_path': '/static/subs/',
             'show_captions': 'true',
             'display_name': u'A Name',
             'end': 3610.0,
@@ -222,20 +230,27 @@ class TestGetHtmlMethod(BaseTestXmodule):
             )
 
             self.initialize_module(data=DATA)
-            track_url = self.item_descriptor.xmodule_runtime.handler_url(self.item_module, 'download_transcript')
+            track_url = self.item_descriptor.xmodule_runtime.handler_url(
+                self.item_descriptor, 'transcript'
+            ).rstrip('/?') + '/download'
 
-            context = self.item_module.render('student_view').content
+            context = self.item_descriptor.render('student_view').content
 
             expected_context.update({
+                'transcript_languages' : '{"en": "English"}' if self.item_descriptor.sub else '{}',
+                'transcript_language': 'en' if self.item_descriptor.sub else json.dumps(None),
+                'transcript_translation_url': self.item_descriptor.xmodule_runtime.handler_url(
+                    self.item_descriptor, 'transcript'
+                ).rstrip('/?') + '/translation',
                 'ajax_url': self.item_descriptor.xmodule_runtime.ajax_url + '/save_user_state',
                 'track': track_url if data['expected_track_url'] == u'a_sub_file.srt.sjson' else data['expected_track_url'],
                 'sub': data['sub'],
-                'id': self.item_module.location.html_id(),
+                'id': self.item_descriptor.location.html_id(),
             })
 
             self.assertEqual(
                 context,
-                self.item_module.xmodule_runtime.render_template('video.html', expected_context),
+                self.item_descriptor.xmodule_runtime.render_template('video.html', expected_context),
             )
 
     def test_get_html_source(self):
@@ -301,7 +316,6 @@ class TestGetHtmlMethod(BaseTestXmodule):
 
         expected_context = {
             'data_dir': getattr(self, 'data_dir', None),
-            'caption_asset_path': '/static/subs/',
             'show_captions': 'true',
             'display_name': u'A Name',
             'end': 3610.0,
@@ -317,6 +331,8 @@ class TestGetHtmlMethod(BaseTestXmodule):
             'autoplay': settings.FEATURES.get('AUTOPLAY_VIDEOS', True),
             'yt_test_timeout': 1500,
             'yt_test_url': 'https://gdata.youtube.com/feeds/api/videos/',
+            'transcript_language': 'en',
+            'transcript_languages' : '{"en": "English"}',
         }
 
         for data in cases:
@@ -326,17 +342,20 @@ class TestGetHtmlMethod(BaseTestXmodule):
                 sources=data['sources']
             )
             self.initialize_module(data=DATA)
-            context = self.item_module.render('student_view').content
+            context = self.item_descriptor.render('student_view').content
 
             expected_context.update({
+                'transcript_translation_url': self.item_descriptor.xmodule_runtime.handler_url(
+                    self.item_descriptor, 'transcript'
+                ).rstrip('/?') + '/translation',
                 'ajax_url': self.item_descriptor.xmodule_runtime.ajax_url + '/save_user_state',
                 'sources': data['result'],
-                'id': self.item_module.location.html_id(),
+                'id': self.item_descriptor.location.html_id(),
             })
 
             self.assertEqual(
                 context,
-                self.item_module.xmodule_runtime.render_template('video.html', expected_context)
+                self.item_descriptor.xmodule_runtime.render_template('video.html', expected_context)
             )
 
 
@@ -361,9 +380,9 @@ class TestVideoDescriptorInitialization(BaseTestXmodule):
         fields = self.item_descriptor.editable_metadata_fields
 
         self.assertIn('source', fields)
-        self.assertEqual(self.item_module.source, 'http://example.org/video.mp4')
-        self.assertTrue(self.item_module.download_video)
-        self.assertTrue(self.item_module.source_visible)
+        self.assertEqual(self.item_descriptor.source, 'http://example.org/video.mp4')
+        self.assertTrue(self.item_descriptor.download_video)
+        self.assertTrue(self.item_descriptor.source_visible)
 
     def test_source_in_html5sources(self):
         metadata = {
@@ -375,10 +394,10 @@ class TestVideoDescriptorInitialization(BaseTestXmodule):
         fields = self.item_descriptor.editable_metadata_fields
 
         self.assertNotIn('source', fields)
-        self.assertTrue(self.item_module.download_video)
-        self.assertFalse(self.item_module.source_visible)
+        self.assertTrue(self.item_descriptor.download_video)
+        self.assertFalse(self.item_descriptor.source_visible)
 
-    @patch('xmodule.x_module.XModuleDescriptor.editable_metadata_fields', new_callable=PropertyMock)
+    @patch('xmodule.video_module.VideoDescriptor.editable_metadata_fields', new_callable=PropertyMock)
     def test_download_video_is_explicitly_set(self, mock_editable_fields):
         mock_editable_fields.return_value = {
             'download_video': {
@@ -424,6 +443,9 @@ class TestVideoDescriptorInitialization(BaseTestXmodule):
                 'field_name': 'track',
                 'options': [],
             },
+            'transcripts': {
+                # purely mocked
+            }
         }
         metadata = {
             'track': None,
@@ -435,8 +457,8 @@ class TestVideoDescriptorInitialization(BaseTestXmodule):
         fields = self.item_descriptor.editable_metadata_fields
 
         self.assertIn('source', fields)
-        self.assertFalse(self.item_module.download_video)
-        self.assertTrue(self.item_module.source_visible)
+        self.assertFalse(self.item_descriptor.download_video)
+        self.assertTrue(self.item_descriptor.source_visible)
 
     def test_source_is_empty(self):
         metadata = {
@@ -448,7 +470,157 @@ class TestVideoDescriptorInitialization(BaseTestXmodule):
         fields = self.item_descriptor.editable_metadata_fields
 
         self.assertNotIn('source', fields)
-        self.assertFalse(self.item_module.download_video)
+        self.assertFalse(self.item_descriptor.download_video)
+
+
+def _create_srt_file(content=None, lang='uk'):
+    """
+    Create srt file in filesystem.
+    """
+    content = content or textwrap.dedent("""
+        0
+        00:00:00,12 --> 00:00:00,100
+        Привіт, edX вітає вас.
+    """)
+    srt_file = tempfile.NamedTemporaryFile(suffix=".srt")
+    srt_file.content_type = 'application/x-subrip'
+    srt_file.write(content)
+    srt_file.seek(0)
+    return srt_file
+
+
+class TestVideoHandlers(TestVideo):
+
+    non_en_file = _create_srt_file()
+    DATA = """
+        <video show_captions="true"
+        display_name="A Name"
+        >
+            <source src="example.mp4"/>
+            <source src="example.webm"/>
+            <transcript language="uk" src="{}"/>
+        </video>
+    """.format(os.path.split(non_en_file.name)[1])
+
+    MODEL_DATA = {
+        'data': DATA
+    }
+
+    def test_language_is_not_supported(self):
+        request = Request.blank('/download?language=ru')
+        response = self.item_descriptor.transcript(request=request, dispatch='download')
+        self.assertEqual(response.status, '404 Not Found')
+
+    def test_download_transcript_not_exist(self):
+        request = Request.blank('/download?language=en')
+        response = self.item_descriptor.transcript(request=request, dispatch='download')
+        self.assertEqual(response.status, '404 Not Found')
+
+    @patch('xmodule.video_module.VideoModule.get_transcript', return_value='Subs!')
+    def test_download_exist(self, __):
+        request = Request.blank('/download?language=en')
+        response = self.item_descriptor.transcript(request=request, dispatch='download')
+        self.assertEqual(response.body, 'Subs!')
+
+    def test_translation_fails(self):
+        # no videoId
+        request = Request.blank('/translation?language=ru')
+        response = self.item_descriptor.transcript(request=request, dispatch='translation')
+        self.assertEqual(response.status, '400 Bad Request')
+
+        # videoId not found
+        request = Request.blank('/translation?language=ru&videoId=12345')
+        response = self.item_descriptor.transcript(request=request, dispatch='translation')
+        self.assertEqual(response.status, '404 Not Found')
+
+        #language is 'en' but self.sub is None
+        request = Request.blank('/translation?language=en&videoId=12345')
+        # to get instance
+        self.item_descriptor.render('student_view')
+        item = self.item_descriptor.xmodule_runtime.xmodule_instance
+        item.sub = ""
+        response = self.item_descriptor.transcript(request=request, dispatch='translation')
+        self.assertEqual(response.status, '404 Not Found')
+
+    def test_translaton_en_success(self):
+        subs = {"start": [10,], "end": [100,], "text": [ "Hi, welcome to Edx.",]}
+        good_sjson = _create_file(json.dumps(subs))
+        _upload_file(good_sjson, self.item_descriptor.location)
+        subs_id = _get_subs_id(good_sjson.name)
+
+        # to get instance
+        self.item_descriptor.render('student_view')
+        item = self.item_descriptor.xmodule_runtime.xmodule_instance
+
+        item.sub = subs_id
+        request = Request.blank('/translation?language=en&videoId={}'.format(subs_id))
+        response = self.item_descriptor.transcript(request=request, dispatch='translation')
+        self.assertDictEqual(json.loads(response.body), subs)
+
+    def test_translaton_non_en_non_youtube_success(self):
+        subs =  {
+            u'end': [100],
+            u'start': [12],
+            u'text': [
+            u'\u041f\u0440\u0438\u0432\u0456\u0442, edX \u0432\u0456\u0442\u0430\u0454 \u0432\u0430\u0441.'
+        ]}
+        self.non_en_file.seek(0)
+        _upload_srt_file(self.non_en_file, self.item_descriptor.location, os.path.split(self.non_en_file.name)[1])
+        subs_id = _get_subs_id(self.non_en_file.name)
+
+        # to get instance
+        self.item_descriptor.render('student_view')
+        item = self.item_descriptor.xmodule_runtime.xmodule_instance
+        # manually clean youtube_id_1_0, as it has default value
+        item.youtube_id_1_0 = ""
+
+        request = Request.blank('/translation?language=uk&videoId={}'.format(subs_id))
+        response = self.item_descriptor.transcript(request=request, dispatch='translation')
+        self.assertDictEqual(json.loads(response.body), subs)
+
+    def test_translation_non_en_youtube(self):
+        subs =  {
+            u'end': [100],
+            u'start': [12],
+            u'text': [
+            u'\u041f\u0440\u0438\u0432\u0456\u0442, edX \u0432\u0456\u0442\u0430\u0454 \u0432\u0430\u0441.'
+        ]}
+        self.non_en_file.seek(0)
+        _upload_srt_file(self.non_en_file, self.item_descriptor.location, os.path.split(self.non_en_file.name)[1])
+        subs_id = _get_subs_id(self.non_en_file.name)
+        # to get instance
+
+        # youtube 1_0 request, will generate for all speeds for existing ids
+        self.item_descriptor.render('student_view')
+        item = self.item_descriptor.xmodule_runtime.xmodule_instance
+        item.youtube_id_1_0 = subs_id
+        item.youtube_id_0_75 = '0_75'
+        request = Request.blank('/translation?language=uk&videoId={}'.format(subs_id))
+        response = self.item_descriptor.transcript(request=request, dispatch='translation')
+        self.assertDictEqual(json.loads(response.body), subs)
+
+        # 0_75 subs are exist
+        request = Request.blank('/translation?language=uk&videoId={}'.format('0_75'))
+        response = self.item_descriptor.transcript(request=request, dispatch='translation')
+        calculated_0_75 = {
+            u'end': [75],
+            u'start': [9],
+            u'text': [
+            u'\u041f\u0440\u0438\u0432\u0456\u0442, edX \u0432\u0456\u0442\u0430\u0454 \u0432\u0430\u0441.'
+        ]}
+        self.assertDictEqual(json.loads(response.body), calculated_0_75)
+        # 1_5 will be generated from 1_0
+        item = self.item_descriptor.xmodule_runtime.xmodule_instance
+        item.youtube_id_1_5 = '1_5'
+        request = Request.blank('/translation?language=uk&videoId={}'.format('1_5'))
+        response = self.item_descriptor.transcript(request=request, dispatch='translation')
+        calculated_1_5 = {
+            u'end': [150],
+            u'start': [18],
+            u'text': [
+            u'\u041f\u0440\u0438\u0432\u0456\u0442, edX \u0432\u0456\u0442\u0430\u0454 \u0432\u0430\u0441.'
+        ]}
+        self.assertDictEqual(json.loads(response.body), calculated_1_5)
 
 
 class TestVideoGetTranscriptsMethod(TestVideo):
@@ -470,7 +642,7 @@ class TestVideoGetTranscriptsMethod(TestVideo):
     METADATA = {}
 
     def test_good_transcript(self):
-        self.item_module.render('student_view')
+        self.item_descriptor.render('student_view')
         item = self.item_descriptor.xmodule_runtime.xmodule_instance
 
         good_sjson = _create_file(content=textwrap.dedent("""\
@@ -490,10 +662,9 @@ class TestVideoGetTranscriptsMethod(TestVideo):
                 }
             """))
 
-        _upload_file(good_sjson, self.item_module.location)
-        subs_id = _get_subs_id(good_sjson.name)
-
-        text = item.get_transcript(subs_id)
+        _upload_file(good_sjson, self.item_descriptor.location)
+        item.sub = _get_subs_id(good_sjson.name)
+        text = item.get_transcript('en')
         expected_text = textwrap.dedent("""\
             0
             00:00:00,270 --> 00:00:02,720
@@ -508,26 +679,26 @@ class TestVideoGetTranscriptsMethod(TestVideo):
         self.assertEqual(text, expected_text)
 
     def test_not_found_error(self):
-        self.item_module.render('student_view')
+        self.item_descriptor.render('student_view')
         item = self.item_descriptor.xmodule_runtime.xmodule_instance
 
         with self.assertRaises(NotFoundError):
-            item.get_transcript('wrong')
+            item.get_transcript('en')
 
     def test_value_error(self):
-        self.item_module.render('student_view')
+        self.item_descriptor.render('student_view')
         item = self.item_descriptor.xmodule_runtime.xmodule_instance
 
         good_sjson = _create_file(content='bad content')
 
-        _upload_file(good_sjson, self.item_module.location)
-        subs_id = _get_subs_id(good_sjson.name)
+        _upload_file(good_sjson, self.item_descriptor.location)
+        item.sub = _get_subs_id(good_sjson.name)
 
         with self.assertRaises(ValueError):
-            item.get_transcript(subs_id)
+            item.get_transcript('en')
 
     def test_key_error(self):
-        self.item_module.render('student_view')
+        self.item_descriptor.render('student_view')
         item = self.item_descriptor.xmodule_runtime.xmodule_instance
 
         good_sjson = _create_file(content="""
@@ -543,12 +714,11 @@ class TestVideoGetTranscriptsMethod(TestVideo):
                 }
             """)
 
-        _upload_file(good_sjson, self.item_module.location)
-        subs_id = _get_subs_id(good_sjson.name)
+        _upload_file(good_sjson, self.item_descriptor.location)
+        item.sub = _get_subs_id(good_sjson.name)
 
         with self.assertRaises(KeyError):
-            item.get_transcript(subs_id)
-
+            item.get_transcript('en')
 
 def _clear_assets(location):
     store = contentstore()
@@ -560,6 +730,7 @@ def _clear_assets(location):
     assets, __ = store.get_all_content_for_course(content_location)
     for asset in assets:
         asset_location = Location(asset["_id"])
+        del_cached_content(asset_location)
         id = StaticContent.get_id_from_location(asset_location)
         store.delete(id)
 
@@ -572,11 +743,10 @@ def _create_file(content=''):
     sjson_file.content_type = 'application/json'
     sjson_file.write(textwrap.dedent(content))
     sjson_file.seek(0)
-
     return sjson_file
 
-def _upload_file(file, location):
-    filename = 'subs_{}.srt.sjson'.format(_get_subs_id(file.name))
+def _upload_file(file, location, default_filename='subs_{}.srt.sjson'):
+    filename = default_filename.format(_get_subs_id(file.name))
     mime_type = file.content_type
 
     content_location = StaticContent.compute_location(
@@ -584,6 +754,7 @@ def _upload_file(file, location):
     )
 
     sc_partial = partial(StaticContent, content_location, filename, mime_type)
+
     content = sc_partial(file.read())
 
     (thumbnail_content, thumbnail_location) = contentstore().generate_thumbnail(
@@ -597,3 +768,15 @@ def _upload_file(file, location):
 
     contentstore().save(content)
     del_cached_content(content.location)
+
+def _upload_srt_file(file, location, filename):
+    mime_type = file.content_type
+    content_location = StaticContent.compute_location(
+        location.org, location.course, filename
+    )
+    sc_partial = partial(StaticContent, content_location, filename, mime_type)
+    content = sc_partial(file.read())
+    contentstore().save(content)
+    del_cached_content(content.location)
+
+
