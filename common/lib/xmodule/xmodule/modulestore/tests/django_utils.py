@@ -33,7 +33,7 @@ def mixed_store_config(data_dir, mappings):
             'ENGINE': 'xmodule.modulestore.mixed.MixedModuleStore',
             'OPTIONS': {
                 'mappings': mappings,
-                'reference_type': 'Location',
+                'reference_type': 'xmodule.modulestore.Location',
                 'stores': {
                     'default': mongo_config['default'],
                     'xml': xml_config['default']

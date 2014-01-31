@@ -511,6 +511,35 @@ class ModuleStoreReadBase(ModuleStoreRead):
                 return c
         return None
 
+    def update_item(self, xblock, user_id=None, allow_not_found=False, force=False):
+        """
+        Update the given xblock's persisted repr. Pass the user's unique id which the persistent store
+        should save with the update if it has that ability.
+
+        :param allow_not_found: whether this method should raise an exception if the given xblock
+        has not been persisted before.
+        :param force: fork the structure and don't update the course draftVersion if there's a version
+        conflict (only applicable to version tracking and conflict detecting persistence stores)
+
+        :raises VersionConflictError: if package_id and version_guid given and the current
+        version head != version_guid and force is not True. (only applicable to version tracking stores)
+        """
+        raise NotImplementedError
+
+    def delete_item(self, location, user_id=None, delete_all_versions=False, delete_children=False, force=False):
+        """
+        Delete an item from persistence. Pass the user's unique id which the persistent store
+        should save with the update if it has that ability.
+
+        :param delete_all_versions: removes both the draft and published version of this item from
+        the course if using draft and old mongo. Split may or may not implement this.
+        :param force: fork the structure and don't update the course draftVersion if there's a version
+        conflict (only applicable to version tracking and conflict detecting persistence stores)
+
+        :raises VersionConflictError: if package_id and version_guid given and the current
+        version head != version_guid and force is not True. (only applicable to version tracking stores)
+        """
+        raise NotImplementedError
 
 class ModuleStoreWriteBase(ModuleStoreReadBase, ModuleStoreWrite):
     '''

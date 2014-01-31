@@ -37,7 +37,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-02-11 18:20-0500\n"
+"POT-Creation-Date: 2014-02-13 11:32-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -10851,6 +10851,18 @@ msgstr "Ìntrödüçïng Ýöür Çöürsé Ⱡ'σяє#"
 #: cms/templates/settings.html
 msgid "Information for prospective students"
 msgstr "Ìnförmätïön för pröspéçtïvé stüdénts Ⱡ'σяєм ιρ#"
+
+#: cms/templates/settings.html
+msgid "Course Short Description"
+msgstr "Çöürsé Shört Désçrïptïön Ⱡ'σяє#"
+
+#: cms/templates/settings.html
+msgid ""
+"Appears on the course catalog page when students roll over the course name. "
+"Limit to ~150 characters"
+msgstr ""
+"Àppéärs ön thé çöürsé çätälög pägé whén stüdénts röll övér thé çöürsé nämé. "
+"Lïmït tö ~150 çhäräçtérs Ⱡ'σяєм ιρѕυм ∂σłσя ѕιт αмєт, ¢σ#"
 
 #: cms/templates/settings.html
 msgid "Course Overview"

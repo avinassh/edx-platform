@@ -145,7 +145,7 @@ class LocMapperStore(object):
                 self.create_map_entry(course_location)
                 entry = self.location_map.find_one(location_id)
             else:
-                raise ItemNotFoundError()
+                raise ItemNotFoundError(location)
         elif len(maps) == 1:
             entry = maps[0]
         else:
@@ -175,7 +175,7 @@ class LocMapperStore(object):
             elif add_entry_if_missing:
                 block_id = self._add_to_block_map(location, location_id, entry['block_map'])
             else:
-                raise ItemNotFoundError()
+                raise ItemNotFoundError(location)
         else:
             raise InvalidLocationError()
 
@@ -275,7 +275,7 @@ class LocMapperStore(object):
         maps = self.location_map.find(location_id)
         maps = list(maps)
         if len(maps) == 0:
-            raise ItemNotFoundError()
+            raise ItemNotFoundError(location)
         elif len(maps) == 1:
             entry = maps[0]
         else:

@@ -58,7 +58,8 @@ from pytz import UTC
 from xmodule.errortracker import null_error_tracker
 from xmodule.x_module import prefer_xmodules
 from xmodule.modulestore.locator import (
-    BlockUsageLocator, DefinitionLocator, CourseLocator, VersionTree, LocalId, Locator
+    BlockUsageLocator, DefinitionLocator, CourseLocator, VersionTree,
+    LocalId, Locator
 )
 from xmodule.modulestore.exceptions import InsufficientSpecificationError, VersionConflictError, DuplicateItemError
 from xmodule.modulestore import inheritance, ModuleStoreWriteBase, Location, SPLIT_MONGO_MODULESTORE_TYPE
@@ -243,7 +244,7 @@ class SplitMongoModuleStore(ModuleStoreWriteBase):
         # NOTE: if and when this uses cache, the update if changed logic will break if the cache
         # holds the same objects as the descriptors!
         if not course_locator.is_fully_specified():
-            raise InsufficientSpecificationError('Not fully specified: %s' % course_locator)
+            raise InsufficientSpecificationError('Not fully specified: %s', course_locator)
 
         if course_locator.package_id is not None and course_locator.branch is not None:
             # use the package_id

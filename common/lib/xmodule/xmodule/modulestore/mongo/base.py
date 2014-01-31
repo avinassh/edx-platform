@@ -661,32 +661,11 @@ class MongoModuleStore(ModuleStoreWriteBase):
         xmodule.save()
         return xmodule
 
-    def save_xmodule(self, xmodule):
-        """
-        Save the given xmodule (will either create or update based on whether id already exists).
-        Pulls out the data definition v metadata v children locally but saves it all.
-
-        :param xmodule:
-        """
-        # Save any changes to the xmodule to the MongoKeyValueStore
-        xmodule.save()
-        self.collection.save({
-            '_id': namedtuple_to_son(xmodule.location),
-            'metadata': own_metadata(xmodule),
-            'definition': {
-                'data': xmodule.get_explicitly_set_fields_by_scope(Scope.content),
-                'children': xmodule.children if xmodule.has_children else []
-            }
-        })
-        # recompute (and update) the metadata inheritance tree which is cached
-        self.refresh_cached_metadata_inheritance_tree(xmodule.location)
-        self.fire_updated_modulestore_signal(get_course_id_no_run(xmodule.location), xmodule.location)
-
     def create_and_save_xmodule(self, location, definition_data=None, metadata=None, system=None):
         """
         Create the new xmodule and save it. Does not return the new module because if the caller
         will insert it as a child, it's inherited metadata will completely change. The difference
-        between this and just doing create_xmodule and save_xmodule is this ensures static_tabs get
+        between this and just doing create_xmodule and update_item is this ensures static_tabs get
         pointed to by the course.
 
         :param location: a Location--must have a category
@@ -698,7 +677,7 @@ class MongoModuleStore(ModuleStoreWriteBase):
         # layer but added it here to enable quick conversion. I'll need to reconcile these.
         new_object = self.create_xmodule(location, definition_data, metadata, system)
         location = new_object.location
-        self.save_xmodule(new_object)
+        self.update_item(new_object, allow_not_found=True)
 
         # VS[compat] cdodge: This is a hack because static_tabs also have references from the course module, so
         # if we add one then we need to also add it to the policy information (i.e. metadata)
@@ -715,7 +694,7 @@ class MongoModuleStore(ModuleStoreWriteBase):
             course.tabs = existing_tabs
             # Save any changes to the course to the MongoKeyValueStore
             course.save()
-            self.update_item(course, '**replace_user**')
+            self.update_item(course)
 
     def fire_updated_modulestore_signal(self, course_id, location):
         """
@@ -772,7 +751,7 @@ class MongoModuleStore(ModuleStoreWriteBase):
         if result['n'] == 0:
             raise ItemNotFoundError(location)
 
-    def update_item(self, xblock, user, allow_not_found=False):
+    def update_item(self, xblock, user=None, allow_not_found=False):
         """
         Update the persisted version of xblock to reflect its current values.
 
@@ -846,7 +825,7 @@ class MongoModuleStore(ModuleStoreWriteBase):
         location = Location.ensure_fully_specified(location)
         items = self.collection.find({'definition.children': location.url()},
                                      {'_id': True})
-        return [i['_id'] for i in items]
+        return [Location(i['_id']) for i in items]
 
     def get_modulestore_type(self, course_id):
         """
