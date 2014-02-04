@@ -13,6 +13,10 @@ define(
     */
 
     var BaseView = Backbone.View.extend({
+        events: {
+          "click .ui-toggle-expansion": "toggleExpandCollapse"
+        },
+
         //override the constructor function
         constructor: function(options) {
             _.bindAll(this, 'beforeRender', 'render', 'afterRender');
@@ -28,15 +32,22 @@ define(
             Backbone.View.prototype.constructor.apply(this, arguments);
         },
 
-        beforeRender: function () {
+        beforeRender: function() {
         },
 
-        render: function () {
+        render: function() {
             return this;
         },
 
-        afterRender: function () {
+        afterRender: function() {
             IframeUtils.iframeBinding(this);
+        },
+
+        toggleExpandCollapse: function(event) {
+            var target = $(event.target);
+            event.preventDefault();
+            target.toggleClass('expand').toggleClass('collapse');
+            target.closest('.is-collapsible, .window').toggleClass('collapsed');
         }
     });
 

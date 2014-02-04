@@ -1,0 +1,110 @@
+<%inherit file="base.html" />
+<%!
+from django.core.urlresolvers import reverse
+from django.utils.translation import ugettext as _
+%>
+<%block name="title">${_("Container")}</%block>
+<%block name="bodyclass">is-signedin course view-container</%block>
+
+<%namespace name='static' file='static_content.html'/>
+<%namespace name="units" file="widgets/units.html" />
+
+<%block name="header_extras">
+% for template_name in [ ]:
+<script type="text/template" id="${template_name}-tpl">
+    <%static:include path="js/${template_name}.underscore" />
+</script>
+% endfor
+</%block>
+
+<%block name="jsextra">
+<script type='text/javascript'>
+    require(["domReady!", "jquery", "js/models/xblock_info", "js/views/xblock", "jquery.ui"],
+            function(doc, $, XBlockInfo, XBlockView, ui) {
+                var model;
+                window.unit_location_analytics = '${container_locator}';
+
+                // tabs
+                $('.tab-group').tabs();
+
+                model = new XBlockInfo({
+                    id: '${container_locator}',
+                    display_name: '${container_display_name}',
+                    category: '${container_category}'
+                });
+                new XBlockView({
+                    el: $('.xblock-wrapper-pagelevel').first(),
+                    model: model
+                });
+
+                $('.new-component-template').each(function(){
+                    $emptyEditor = $(this).find('.empty');
+                    $(this).prepend($emptyEditor);
+                });
+            });
+</script>
+
+</%block>
+
+<%block name="content">
+
+
+<div class="wrapper-mast wrapper">
+    <header class="mast has-actions has-navigation">
+        <h1 class="page-header">
+            <small class="navigation navigation-parents">
+                <a href="${parent_url}" class="navigation-link navigation-parent">${parent_display_name}</a>
+            </small>
+            <span class="sr">&gt; </span>
+            <span class="container-page-name">${container_display_name}</span>
+        </h1>
+
+        <nav class="nav-actions">
+            <h3 class="sr">${_("Page Actions")}</h3>
+            <ul>
+                <li class="nav-item">
+                    <a href="#" class="button upload-button new-button"><i class="icon-plus"></i> ${_("Upload New File")}</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+</div>
+
+<div class="wrapper-content wrapper">
+    <div class="inner-wrapper">
+        <section class="content-area">
+
+            <article class="content-primary">
+                <section class="xblock-wrapper xblock-wrapper-pagelevel" data-locator="${container_locator}"/>
+            </article>
+            <aside class="content-supplementary" role="complimentary">
+                <div class="bit">
+                    <h3 class="title-3">${_("What can I do on this page?")}</h3>
+                    <ul class="list-details">
+                        <li class="item-detail">${_("Primary description sidebar element for containers, explaining how they are used in Studio and what their course impact is. ")}</li>
+                    </ul>
+                </div>
+            </aside>
+        </section>
+    </div>
+</div>
+
+</%block>
+
+<%block name="view_alerts">
+<!-- alert: save confirmed with close -->
+<div class="wrapper wrapper-alert wrapper-alert-confirmation" role="status">
+    <div class="alert confirmation">
+        <i class="icon-ok"></i>
+
+        <div class="copy">
+            <h2 class="title title-3">${_('Your file has been deleted.')}</h2>
+        </div>
+
+        <a href="" rel="view" class="action action-alert-close">
+            <i class="icon-remove-sign"></i>
+            <span class="label">${_('close alert')}</span>
+        </a>
+    </div>
+</div>
+</%block>

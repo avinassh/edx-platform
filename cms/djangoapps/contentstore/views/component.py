@@ -26,6 +26,7 @@ from xmodule.x_module import prefer_xmodules
 from lms.lib.xblock.runtime import unquote_slashes
 
 from contentstore.utils import get_lms_link_for_item, compute_unit_state, UnitState
+from contentstore.views.helpers import xblock_studio_url
 
 from models.settings.course_grading import CourseGradingModel
 
@@ -35,6 +36,7 @@ __all__ = ['OPEN_ENDED_COMPONENT_TYPES',
            'ADVANCED_COMPONENT_POLICY_KEY',
            'subsection_handler',
            'unit_handler',
+           'container_handler',
            'component_handler'
            ]
 
@@ -234,12 +236,13 @@ def unit_handler(request, tag=None, package_id=None, branch=None, version_guid=N
                 course_advanced_keys
             )
 
-        components = [
+        xblocks = item.get_children()
+        locators = [
             loc_mapper().translate_location(
                 course.location.course_id, component.location, False, True
             )
             for component
-            in item.get_children()
+            in xblocks
         ]
 
         # TODO (cpennington): If we share units between courses,
@@ -283,7 +286,8 @@ def unit_handler(request, tag=None, package_id=None, branch=None, version_guid=N
             'context_course': course,
             'unit': item,
             'unit_locator': locator,
-            'components': components,
+            'xblocks': xblocks,
+            'locators': locators,
             'component_templates': component_templates,
             'draft_preview_link': preview_lms_link,
             'published_preview_link': lms_link,
@@ -293,6 +297,59 @@ def unit_handler(request, tag=None, package_id=None, branch=None, version_guid=N
                 if containing_subsection.start is not None else None
             ),
             'section': containing_section,
+            'new_unit_category': 'vertical',
+            'unit_state': compute_unit_state(item),
+            'published_date': (
+                get_default_time_display(item.published_date)
+                if item.published_date is not None else None
+            ),
+        })
+    else:
+        return HttpResponseBadRequest("Only supports html requests")
+
+
+# pylint: disable=unused-argument
+@require_http_methods(["GET"])
+@login_required
+def container_handler(request, tag=None, package_id=None, branch=None, version_guid=None, block=None):
+    """
+    The restful handler for unit-specific requests.
+
+    GET
+        html: return html page for editing a unit
+        json: not currently supported
+    """
+    if 'text/html' in request.META.get('HTTP_ACCEPT', 'text/html'):
+        locator = BlockUsageLocator(package_id=package_id, branch=branch, version_guid=version_guid, block_id=block)
+        try:
+            old_location, course, item, __ = _get_item_in_course(request, locator)
+        except ItemNotFoundError:
+            return HttpResponseBadRequest()
+
+        components = [
+            loc_mapper().translate_location(
+                course.location.course_id, component.location, False, True
+            )
+            for component
+            in item.get_children()
+        ]
+
+        parent_locators = modulestore().get_parent_locations(old_location, None)
+        parent_xblock = modulestore().get_item(parent_locators[0])
+        parent_url = xblock_studio_url(parent_xblock)
+
+        return render_to_response('container.html', {
+            'context_course': course,
+            'container_display_name': item.display_name,
+            'container_locator': locator,
+            'parent_display_name': parent_xblock.display_name,
+            'parent_url': parent_url,
+            'container_category': item.category,
+            'components': components,
+            'release_date': (
+                get_default_time_display(parent_xblock.start)
+                if parent_xblock.start is not None else None
+            ),
             'new_unit_category': 'vertical',
             'unit_state': compute_unit_state(item),
             'published_date': (

@@ -3,6 +3,7 @@
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext as _
 from xmodule.modulestore.django import loc_mapper
+from contentstore.views.helpers import xblock_studio_url
 %>
 <%namespace name='static' file='static_content.html'/>
 <%namespace name="units" file="widgets/units.html" />
@@ -53,8 +54,33 @@ require(["domReady!", "jquery", "js/models/module_info", "coffee/src/views/unit"
         <article class="unit-body window">
         <p class="unit-name-input"><label for="unit-display-name-input">${_("Display Name:")}</label><input type="text" value="${unit.display_name_with_default | h}" id="unit-display-name-input" class="unit-display-name-input" /></p>
           <ol class="components">
-            % for locator in components:
-            <li class="component" data-locator="${locator}"/>
+            % for xblock, locator in zip(xblocks, locators):
+            <%
+              xblock_url = xblock_studio_url(xblock)
+            %>
+            % if xblock.has_children and xblock_url:
+              <li>
+                <section class="xblock-wrapper xblock-type-container xblock-wrapper-elementlevel">
+                  <header class="xblock-header">
+                    <div class="header-details">
+                      ${xblock.display_name}
+                    </div>
+                    <div class="header-actions">
+                      <ul class="actions-list">
+                        <li class="action-item action-view">
+                          <a href="${xblock_url}" class="action-button">
+                            <span class="action-button-text">View</span>
+                            <i class="icon-arrow-right"></i>
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+                  </header>
+                </section>
+              </li>
+            % else:
+              <li class="component" data-locator="${locator}"/>
+            % endif
             % endfor
             <li class="new-component-item adding">
               <div class="new-component">

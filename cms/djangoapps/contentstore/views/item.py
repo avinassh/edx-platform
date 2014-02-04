@@ -108,8 +108,9 @@ def xblock_handler(request, tag=None, package_id=None, branch=None, version_guid
 
         if request.method == 'GET':
             accept_header = request.META.get('HTTP_ACCEPT', 'application/json')
+            is_container_view = 'application/container-x-fragment+json' in accept_header
 
-            if 'application/x-fragment+json' in accept_header:
+            if 'application/x-fragment+json' in accept_header or is_container_view:
                 store = get_modulestore(old_location)
                 component = store.get_item(old_location)
 
@@ -117,31 +118,52 @@ def xblock_handler(request, tag=None, package_id=None, branch=None, version_guid
                 # can bind to it correctly
                 component.runtime.wrappers.append(partial(wrap_xblock, 'StudioRuntime'))
 
-                try:
-                    editor_fragment = component.render('studio_view')
-                # catch exceptions indiscriminately, since after this point they escape the
-                # dungeon and surface as uneditable, unsaveable, and undeletable
-                # component-goblins.
-                except Exception as exc:                          # pylint: disable=W0703
-                    log.debug("Unable to render studio_view for %r", component, exc_info=True)
-                    editor_fragment = Fragment(render_to_string('html_error.html', {'message': str(exc)}))
+                # Only show the new style HTML for the container view, i.e. for non-verticals
+                # Note: this special case logic can be removed once the unit page is replaced
+                # with the new container view.
+                is_read_only_view = is_container_view
+                context = {
+                    'container_view': is_container_view,
+                    'read_only': is_read_only_view,
+                    'root_xblock': component
+                }
 
                 store.save_xmodule(component)
 
-                preview_fragment = get_preview_fragment(request, component)
+                preview_fragment = get_preview_fragment(request, component, context)
 
                 hashed_resources = OrderedDict()
-                for resource in editor_fragment.resources + preview_fragment.resources:
+                for resource in preview_fragment.resources:
                     hashed_resources[hash_resource(resource)] = resource
 
-                return JsonResponse({
-                    'html': render_to_string('component.html', {
-                        'preview': preview_fragment.content,
-                        'editor': editor_fragment.content,
-                        'label': component.display_name or component.scope_ids.block_type,
-                    }),
-                    'resources': hashed_resources.items()
-                })
+                if is_container_view:
+                    return JsonResponse({
+                        'html': preview_fragment.content,
+                        'resources': hashed_resources.items()
+                    })
+                else:
+                    try:
+                        editor_fragment = component.render('studio_view', context)
+                    # catch exceptions indiscriminately, since after this point they escape the
+                    # dungeon and surface as uneditable, unsaveable, and undeletable
+                    # component-goblins.
+                    except Exception as exc:                          # pylint: disable=W0703
+                        log.debug("Unable to render studio_view for %r", component, exc_info=True)
+                        editor_fragment = Fragment(render_to_string('html_error.html', {'message': str(exc)}))
+
+                    modulestore().save_xmodule(component)
+
+                    for resource in editor_fragment.resources:
+                        hashed_resources[hash_resource(resource)] = resource
+
+                    return JsonResponse({
+                        'html': render_to_string('component.html', {
+                            'preview': preview_fragment.content,
+                            'editor': editor_fragment.content,
+                            'label': component.display_name or component.category,
+                        }),
+                        'resources': hashed_resources.items()
+                    })
 
             elif 'application/json' in accept_header:
                 fields = request.REQUEST.get('fields', '').split(',')
@@ -196,7 +218,6 @@ def xblock_handler(request, tag=None, package_id=None, branch=None, version_guid
             "Only instance creation is supported without a package_id.",
             content_type="text/plain"
         )
-
 
 def _save_item(request, usage_loc, item_location, data=None, children=None, metadata=None, nullout=None,
                grader_type=None, publish=None):

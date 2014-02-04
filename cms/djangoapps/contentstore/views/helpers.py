@@ -1,6 +1,7 @@
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from edxmako.shortcuts import render_to_string, render_to_response
+from xmodule.modulestore.django import loc_mapper, modulestore
 
 __all__ = ['edge', 'event', 'landing']
 
@@ -35,3 +36,26 @@ def _xmodule_recurse(item, action):
         _xmodule_recurse(child, action)
 
     action(item)
+
+
+def xblock_studio_url(xblock):
+    """
+    Returns the Studio editing URL for the specified xblock.
+    """
+    category = xblock.category
+    locator = loc_mapper().translate_location(None, xblock.location)
+    old_location = loc_mapper().translate_locator_to_location(locator)
+    parent_locators = modulestore().get_parent_locations(old_location, None)
+    parent_xblock = modulestore().get_item(parent_locators[0])
+    parent_category = parent_xblock.category
+    if category == 'course':
+        prefix = 'course'
+    elif category == 'vertical' and parent_category == 'sequential':
+        prefix = 'unit'     # only show the unit page for verticals directly beneath a subsection
+    elif not xblock.has_children or category == 'sequential':
+        prefix = None   # there is no page for this xblock
+    else:
+        prefix = 'container'
+    if not prefix:
+        return None
+    return locator.url_reverse(prefix + '/', '')
