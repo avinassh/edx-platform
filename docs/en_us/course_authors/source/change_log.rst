@@ -11,6 +11,8 @@ Change Log
 
    * - Date
      - Change
+   * - 02/23/14
+     - Added section :ref:`Shuffle Answers in a Multiple Choice Problem`
    * - 02/07/14
      - Added section on :ref:`Full Screen Image`.
    * - 02/05/14

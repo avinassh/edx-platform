@@ -225,6 +225,73 @@ following.
     investigating lateral inhibition using horseshoe crabs.
     [Explanation]
 
+.. _Shuffle Answers in a Multiple Choice Problem:
+
+=============================================
+Shuffle Answers in a Multiple Choice Problem
+============================================= 
+
+Optionally, you can configure a multiple choice problem so that it shuffles the order of possible answers.
+
+For example, one view of the problem could be:
+
+.. image:: Images/multiple-choice-shuffle-1.png
+ :alt: Image of a multiple choice problem
+
+And another view of the same problem, for another student or for the same student of a subsequent view of the unit, could be:
+
+.. image:: Images/multiple-choice-shuffle-2.png
+ :alt: Image of a multiple choice problem with shuffled answers
+
+
+To configure the problem to shuffle answers, you must edit the XML in the :ref:`Advanced Editor`.
+
+For example, the following XML defines a multiple choice problem, before shuffling is enabled:
+
+.. code-block:: xml
+
+ <p>What Apple device competed with the portable CD player?</p>
+ <multiplechoiceresponse>
+  <choicegroup type="MultipleChoice">
+    <choice correct="false">The iPad</choice>
+    <choice correct="false">Napster</choice>
+    <choice correct="true">The iPod</choice>
+    <choice correct="false">The vegetable peeler</choice>
+  </choicegroup>
+ </multiplechoiceresponse>
+
+
+To add shuffling to this problem, add ``shuffle="true"`` to the ``<choicegroup>`` element:
+
+.. code-block:: xml
+
+ <p>What Apple device competed with the portable CD player?</p>
+ <multiplechoiceresponse>
+  <choicegroup type="MultipleChoice" shuffle="true">
+    <choice correct="false">The iPad</choice>
+    <choice correct="false">Napster</choice>
+    <choice correct="true">The iPod</choice>
+    <choice correct="false">The vegetable peeler</choice>
+  </choicegroup>
+ </multiplechoiceresponse>
+
+In some situations you may want to shuffle some answers, but not others. For example, you may want to have the answer "All of the Above" fixed at the end of the list, but shuffle other answers.  To fix an answer's location in the list, add ``fixed="true"`` to the ``choice`` element for the answer:
+
+.. code-block:: xml
+
+ <p>What Apple device competed with the portable CD player?</p>
+ <multiplechoiceresponse>
+  <choicegroup type="MultipleChoice" shuffle="true">
+    <choice correct="false">The iPad</choice>
+    <choice correct="false">Napster</choice>
+    <choice correct="true">The iPod</choice>
+    <choice correct="false">The vegetable peeler</choice>
+    <choice correct="false" fixed="true">All of the above</choice>
+  </choicegroup>
+ </multiplechoiceresponse>
+
+
+
 .. _Numerical Input:
 
 *******************
