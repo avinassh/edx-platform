@@ -295,14 +295,8 @@ MICROSITE_CONFIGURATION = {
         "homepage_overlay_html": "<h1>This is a Test Microsite Overlay HTML</h1>"
     }
 }
-
-if len(MICROSITE_CONFIGURATION.keys()) > 0:
-    enable_microsites(
-        MICROSITE_CONFIGURATION,
-        SUBDOMAIN_BRANDING,
-        VIRTUAL_UNIVERSITIES,
-        microsites_root=COMMON_ROOT / "test" / 'test_microsites'
-    )
+MICROSITE_ROOT_DIR = COMMON_ROOT / 'test' / 'test_microsites'
+FEATURES['USE_MICROSITES'] = True
 
 ######### LinkedIn ########
 LINKEDIN_API['COMPANY_ID'] = '0000000'

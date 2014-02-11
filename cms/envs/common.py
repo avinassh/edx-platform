@@ -26,7 +26,7 @@ Longer TODO:
 
 import sys
 import lms.envs.common
-from lms.envs.common import USE_TZ, TECH_SUPPORT_EMAIL, PLATFORM_NAME, BUGS_EMAIL, DOC_STORE_CONFIG, enable_microsites
+from lms.envs.common import USE_TZ, TECH_SUPPORT_EMAIL, PLATFORM_NAME, BUGS_EMAIL, DOC_STORE_CONFIG
 from path import path
 
 from lms.lib.xblock.mixin import LmsBlockMixin
@@ -76,6 +76,9 @@ FEATURES = {
 
     # Allow editing of short description in course settings in cms
     'EDITABLE_SHORT_DESCRIPTION': True,
+
+    # Turn on/off Microsites feature
+    'USE_MICROSITES': False,
 }
 ENABLE_JASMINE = False
 
