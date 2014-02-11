@@ -676,7 +676,7 @@ TEMPLATE_LOADERS = (
 
 MIDDLEWARE_CLASSES = (
     'request_cache.middleware.RequestCache',
-    'microsite_configuration.middleware.MicrositeConfiguration',
+    'microsite_configuration.middleware.MicrositeMiddleware',
     'django_comment_client.middleware.AjaxExceptionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -1176,16 +1176,6 @@ def enable_microsites(microsite_config_dict, subdomain_branding, virtual_univers
         if os.path.isdir(microsite_root):
             # store the path on disk for later use
             microsite_config['microsite_root'] = microsite_root
-
-            # get the domain that this should reside
-            domain = microsite_config['domain_prefix']
-
-            # get the virtual university that this should use
-            university = microsite_config['university']
-
-            # add to the existing maps in our settings
-            subdomain_branding[domain] = university
-            virtual_universities.append(university)
 
             template_dir = microsite_root / 'templates'
             microsite_config['template_dir'] = template_dir
