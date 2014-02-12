@@ -170,6 +170,12 @@ the question.
 .. image:: Images/MultipleChoiceExample.gif
  :alt: Image of a multiple choice problem
 
+You can also configure the following:
+
+* :ref:`Shuffle Answers in a Multiple Choice Problem`
+* :ref:`Targeted Feedback in a Multiple Choice Problem`
+* :ref:`Answer Pools in a Multiple Choice Problem`
+
 ==================================
 Create a Multiple Choice Problem
 ==================================
@@ -243,8 +249,50 @@ And another view of the same problem, for another student or for the same studen
 .. image:: Images/multiple-choice-shuffle-2.png
  :alt: Image of a multiple choice problem with shuffled answers
 
+You can also have some answers shuffled, but not others. For example, you may want to have the answer "All of the Above" fixed at the end of the list, but shuffle other answers.
 
-To configure the problem to shuffle answers, you must edit the XML in the :ref:`Advanced Editor`.
+You can configure the problem to shuffle answers through :ref:`Simple Editor` or :ref:`Advanced Editor`.
+
+++++++++++++++++++++++++++++++++++++++++++
+Use the Simple Editor to Shuffle Answers
+++++++++++++++++++++++++++++++++++++++++++
+
+You can configure the problem to shuffle answers through XML in :ref:`Simple Editor`.
+
+For example, the following XML defines a multiple choice problem, before shuffling is enabled. The ``(x)`` indicates the correct answer::
+
+ What Apple device competed with the portable CD player?
+     ( ) The iPad
+     ( ) Napster
+     (x) The iPod
+     ( ) The vegetable peeler
+
+To add shuffling to this problem, add ``!`` in parenthesis of the first answer::
+
+ What Apple device competed with the portable CD player?
+     (!) The iPad
+     ( ) Napster
+     (x) The iPod
+     ( ) The vegetable peeler
+
+To fix an answer's location in the list, add ``@`` in parenthesis of the that answer::
+
+ What Apple device competed with the portable CD player?
+     (!) The iPad
+     ( ) Napster
+     (x) The iPod
+     ( ) The vegetable peeler
+     (@) All of the above
+
+You can combine symbols within parenthesis as necessary. For example, to show the correct answer in a fixed location, you could use::
+ 
+  (x@) The iPod
+
+++++++++++++++++++++++++++++++++++++++++++
+Use the Advanced Editor to Shuffle Answers
+++++++++++++++++++++++++++++++++++++++++++
+
+You can configure the problem to shuffle answers through XML in :ref:`Advanced Editor`.
 
 For example, the following XML defines a multiple choice problem, before shuffling is enabled:
 
@@ -275,7 +323,7 @@ To add shuffling to this problem, add ``shuffle="true"`` to the ``<choicegroup>`
   </choicegroup>
  </multiplechoiceresponse>
 
-In some situations you may want to shuffle some answers, but not others. For example, you may want to have the answer "All of the Above" fixed at the end of the list, but shuffle other answers.  To fix an answer's location in the list, add ``fixed="true"`` to the ``choice`` element for the answer:
+To fix an answer's location in the list, add ``fixed="true"`` to the ``choice`` element for the answer:
 
 .. code-block:: xml
 
@@ -290,6 +338,91 @@ In some situations you may want to shuffle some answers, but not others. For exa
   </choicegroup>
  </multiplechoiceresponse>
 
+
+.. _Targeted Feedback in a Multiple Choice Problem:
+
+===============================================
+Targeted Feedback in a Multiple Choice Problem
+===============================================
+
+Optionally, you can configure a multiple choice problem so explanation for incorrect answers are automatically shown to students.  You can use these explanations to guide students towards the right answer.  Therefore, targeted feedback is most useful for multiple choice problems for which students are allowed multiple attempts.
+
+For example, when a student selects an incorrect answer, the an explanation is shown:
+
+IMAGE
+
+You can configure the problem to show targeted feedback through :ref:`Advanced Editor`.
+
+MARKUP OPTIONS?  DIDN'T SEE TESTS FOR IT
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Use the Advanced Editor to Configure Trageted Feedback
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+You configure the problem to provide targeted feedback through XML in :ref:`Advanced Editor`.
+
+Follow these XML guidelines:
+
+* Add a ``<targetedfeedbackset>`` element before the ``<solution>`` element.
+* Within ``<targetedfeedbackset>``, add one or more ``<targetedfeedback>`` elements.
+* Within each ``<targetedfeedback>`` element, enter your explanation in HTML markup described below.
+* Connect the ``<targetedfeedback>`` element with a specific answer by using the same ``explanation-id`` attribute value for each.
+
+For example, the XML for the multiple choice problem is:
+
+.. code-block:: xml
+
+   <p>What Apple device competed with the portable CD player?</p>
+   <multiplechoiceresponse>
+    <choicegroup type="MultipleChoice">
+      <choice correct="false" explanation-id="feedback1">The iPad</choice>
+      <choice correct="false" explanation-id="feedback2">Napster</choice>
+      <choice correct="true" explanation-id="correct">The iPod</choice>
+      <choice correct="false" explanation-id="feedback3">The vegetable peeler</choice>
+    </choicegroup>
+   </multiplechoiceresponse>
+ 
+This is followed by the following XML that defines the targeted feedback:
+
+.. code-block:: xml
+
+   <targetedfeedbackset>
+     <targetedfeedback explanation-id="feedback1">
+       <div class="detailed-targeted-feedback">
+         <p>Targeted Feedback</p>
+         <p>The iPad came out later and did not directly compete the portable CD players.</p>
+       </div>
+     </targetedfeedback>
+     <targetedfeedback explanation-id="feedback2">
+       <div class="detailed-targeted-feedback">
+         <p>Targeted Feedback</p>
+         <p>Napster was not an Apple product.</p>
+       </div>
+     </targetedfeedback>
+     <targetedfeedback explanation-id="correct">
+       <div class="detailed-targeted-feedback">
+         <p>Targeted Feedback</p>
+         <p>Yes, the iPod competed with portable CD players.</p>
+       </div>
+     </targetedfeedback>
+     <targetedfeedback explanation-id="feeback3">
+       <div class="detailed-targeted-feedback">
+         <p>Targeted Feedback</p>
+         <p>No, not even close.</p>
+       </div>
+     </targetedfeedback>
+    </targetedfeedbackset>
+
+QUESTION -- DO YOU STILL NEED SOLUTION ELEMENT IN THIS SCENARIO?
+
+
+.. _Answer Pools in a Multiple Choice Problem:
+
+===============================================
+Answer Pools in a Multiple Choice Problem
+===============================================
+
+TBD
 
 
 .. _Numerical Input:
