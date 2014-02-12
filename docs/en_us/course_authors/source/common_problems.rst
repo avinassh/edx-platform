@@ -356,7 +356,7 @@ You can configure the problem to show targeted feedback through :ref:`Advanced E
 MARKUP OPTIONS?  DIDN'T SEE TESTS FOR IT
 
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Use the Advanced Editor to Configure Trageted Feedback
+Use the Advanced Editor to Configure Targeted Feedback
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 You configure the problem to provide targeted feedback through XML in :ref:`Advanced Editor`.
