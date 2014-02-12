@@ -382,7 +382,7 @@ For example, the XML for the multiple choice problem is:
     </choicegroup>
    </multiplechoiceresponse>
  
-This is followed by the following XML that defines the targeted feedback:
+This is followed by XML that defines the targeted feedback:
 
 .. code-block:: xml
 
