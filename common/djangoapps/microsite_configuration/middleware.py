@@ -6,7 +6,7 @@ A microsite enables the following features:
 2) Present a landing page with a listing of courses that are specific to the 'brand'
 3) Ability to swap out some branding elements in the website
 """
-from .microsite import Microsite
+import microsite
 
 
 class MicrositeMiddleware(object):
@@ -20,11 +20,11 @@ class MicrositeMiddleware(object):
         Middleware entry point on every request processing. This will associate a request's domain name
         with a 'University' and any corresponding microsite configuration information
         """
-        Microsite.clear()
+        microsite.clear()
 
         domain = request.META.get('HTTP_HOST', None)
 
-        request.microsite_configuration = Microsite.set_by_domain(domain)
+        microsite.set_by_domain(domain)
 
         return None
 
@@ -32,5 +32,5 @@ class MicrositeMiddleware(object):
         """
         Middleware entry point for request completion.
         """
-        Microsite.clear()
+        microsite.clear()
         return response

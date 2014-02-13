@@ -35,7 +35,7 @@ from verify_student.models import SoftwareSecurePhotoVerification
 from .exceptions import (InvalidCartItem, PurchasedCallbackException, ItemAlreadyInCartException,
                          AlreadyEnrolledInCourseException, CourseDoesNotExistException)
 
-from microsite_configuration.microsite import Microsite
+from microsite_configuration import microsite
 
 log = logging.getLogger("shoppingcart")
 
@@ -175,7 +175,7 @@ class Order(models.Model):
             }
         )
         try:
-            from_address = Microsite.get_value(
+            from_address = microsite.get_value(
                 'email_from_address',
                 settings.DEFAULT_FROM_EMAIL
             )
@@ -477,7 +477,7 @@ class CertificateItem(OrderItem):
                                                                                                        user_email=course_enrollment.user.email,
                                                                                                        order_number=order_number)
         to_email = [settings.PAYMENT_SUPPORT_EMAIL]
-        from_email = [Microsite.get_value(
+        from_email = [microsite.get_value(
             'payment_support_email',
             settings.PAYMENT_SUPPORT_EMAIL
         )]

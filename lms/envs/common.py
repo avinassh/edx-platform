@@ -220,7 +220,7 @@ FEATURES = {
     'ENABLE_MAX_FAILED_LOGIN_ATTEMPTS': False,
 
     # Turn on/off Microsites feature
-    'USE_MICROSITES': True,
+    'USE_MICROSITES': False,
 }
 
 # Used for A/B testing
