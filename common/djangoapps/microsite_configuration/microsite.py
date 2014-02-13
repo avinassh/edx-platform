@@ -75,10 +75,10 @@ def get_value_for_org(org, val_name, default=None):
     if not has_configuration_set():
         return default
 
-    for key in settings.MICROSITE_CONFIGURATION.keys():
-        org_filter = settings.MICROSITE_CONFIGURATION[key].get('course_org_filter', None)
+    for value in settings.MICROSITE_CONFIGURATION.values():
+        org_filter = value.get('course_org_filter', None)
         if org_filter == org:
-            return settings.MICROSITE_CONFIGURATION[key].get(val_name, default)
+            return value.get(val_name, default)
     return default
 
 def get_all_orgs():
@@ -90,8 +90,8 @@ def get_all_orgs():
     if not has_configuration_set():
         return org_filter_set
 
-    for key in settings.MICROSITE_CONFIGURATION:
-        org_filter = settings.MICROSITE_CONFIGURATION[key].get('course_org_filter')
+    for value in settings.MICROSITE_CONFIGURATION.values():
+        org_filter = value.get('course_org_filter')
         if org_filter:
             org_filter_set.append(org_filter)
 
@@ -110,11 +110,16 @@ def _set_current_microsite(microsite_config_key, subdomain, domain):
     _microsite_configuration_threadlocal.data = config
 
 def set_by_domain(domain):
+    """
+    For a given request domain, find a match in our microsite configuration and then assign
+    it to the thread local so that it is available throughout the entire
+    Django request processing
+    """
     if not has_configuration_set() or not domain:
         return
 
-    for key in settings.MICROSITE_CONFIGURATION.keys():
-        subdomain = settings.MICROSITE_CONFIGURATION[key]['domain_prefix']
+    for key, value in settings.MICROSITE_CONFIGURATION.items():
+        subdomain = value['domain_prefix']
         if domain.startswith(subdomain):
             _set_current_microsite(key, subdomain, domain)
             return
