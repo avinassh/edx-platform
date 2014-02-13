@@ -25,9 +25,6 @@ from django.utils.translation import ugettext as _
                     view;
                 window.unit_location_analytics = '${container_locator}';
 
-                // tabs
-                $('.tab-group').tabs();
-
                 model = new XBlockInfo({
                     id: '${container_locator}',
                     display_name: '${container_display_name}',
@@ -51,9 +48,9 @@ from django.utils.translation import ugettext as _
         <h1 class="page-header">
             <small class="navigation navigation-parents">
                 <a href="${parent_url}" class="navigation-link navigation-parent">${parent_display_name}</a>
+                <a href="#" class="navigation-link navigation-current">${container_display_name}</a>
+
             </small>
-            <span class="sr">&gt; </span>
-            <span class="container-page-name">${container_display_name}</span>
         </h1>
 
         <nav class="nav-actions">

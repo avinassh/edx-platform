@@ -52,7 +52,7 @@ define(["jquery", "underscore", "backbone", "js/utils/handle_iframe_binding", "x
              * @param element The element into which to render the fragment (defaults to this.$el)
              */
             renderXBlockFragment: function(fragment, element) {
-                var value, applyResource, i, len, resources, resource;
+                var value, applyResource, i, len, resources, resource, xblockElement;
                 if (!element) {
                     element = this.$el;
                 }
@@ -93,7 +93,10 @@ define(["jquery", "underscore", "backbone", "js/utils/handle_iframe_binding", "x
                     resource = resources[i];
                     applyResource(resource);
                 }
-                XBlock.initializeBlock(element.find('.xblock-student_view'));
+                xblockElement = element.find('.xblock-student_view');
+                if (xblockElement.length > 0) {
+                    XBlock.initializeBlock(xblockElement);
+                }
                 return this.delegateEvents();
             }
         });
