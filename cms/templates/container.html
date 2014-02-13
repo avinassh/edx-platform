@@ -19,9 +19,10 @@ from django.utils.translation import ugettext as _
 
 <%block name="jsextra">
 <script type='text/javascript'>
-    require(["domReady!", "jquery", "js/models/xblock_info", "js/views/xblock", "jquery.ui"],
-            function(doc, $, XBlockInfo, XBlockView, ui) {
-                var model;
+    require(["domReady!", "jquery", "js/models/xblock_info", "js/views/xblock"],
+            function(doc, $, XBlockInfo, XBlockView) {
+                var model,
+                    view;
                 window.unit_location_analytics = '${container_locator}';
 
                 // tabs
@@ -32,15 +33,11 @@ from django.utils.translation import ugettext as _
                     display_name: '${container_display_name}',
                     category: '${container_category}'
                 });
-                new XBlockView({
+                view = new XBlockView({
                     el: $('.xblock-wrapper-pagelevel').first(),
                     model: model
                 });
-
-                $('.new-component-template').each(function(){
-                    $emptyEditor = $(this).find('.empty');
-                    $(this).prepend($emptyEditor);
-                });
+                view.render();
             });
 </script>
 
