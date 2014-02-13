@@ -142,7 +142,7 @@ class ChoiceGroupTemplateTest(TemplateTestCase):
 
         # Should mark the entire problem correct
         xml = self.render_to_xml(self.context)
-        xpath = "//div[@class='indicator_container']/span[@class='correct']"
+        xpath = "//div[@class='indicator_container']/span[@class='status correct']"
         self.assert_has_xpath(xml, xpath, self.context)
 
         # Should NOT mark individual options
@@ -170,7 +170,7 @@ class ChoiceGroupTemplateTest(TemplateTestCase):
         for test_conditions in conditions:
             self.context.update(test_conditions)
             xml = self.render_to_xml(self.context)
-            xpath = "//div[@class='indicator_container']/span[@class='incorrect']"
+            xpath = "//div[@class='indicator_container']/span[@class='status incorrect']"
             self.assert_has_xpath(xml, xpath, self.context)
 
             # Should NOT mark individual options
@@ -202,7 +202,7 @@ class ChoiceGroupTemplateTest(TemplateTestCase):
         for test_conditions in conditions:
             self.context.update(test_conditions)
             xml = self.render_to_xml(self.context)
-            xpath = "//div[@class='indicator_container']/span[@class='unanswered']"
+            xpath = "//div[@class='indicator_container']/span[@class='status unanswered']"
             self.assert_has_xpath(xml, xpath, self.context)
 
             # Should NOT mark individual options
@@ -287,10 +287,10 @@ class ChoiceGroupTemplateTest(TemplateTestCase):
             xml = self.render_to_xml(self.context)
 
             # Should NOT mark the entire problem correct/incorrect
-            xpath = "//div[@class='indicator_container']/span[@class='correct']"
+            xpath = "//div[@class='indicator_container']/span[@class='status correct']"
             self.assert_no_xpath(xml, xpath, self.context)
 
-            xpath = "//div[@class='indicator_container']/span[@class='incorrect']"
+            xpath = "//div[@class='indicator_container']/span[@class='status incorrect']"
             self.assert_no_xpath(xml, xpath, self.context)
 
             # Should NOT mark individual options
@@ -369,7 +369,7 @@ class TextlineTemplateTest(TemplateTestCase):
             base_context = self.context.copy()
             base_context.update(context)
             xml = self.render_to_xml(base_context)
-            xpath = "//section[@class='%s']" % css_class
+            xpath = "//div[@class='%s']" % css_class
             self.assert_has_xpath(xml, xpath, self.context)
 
     def test_status(self):
@@ -695,10 +695,10 @@ class OptionInputTemplateTest(TemplateTestCase):
 
         # Test cases, where each tuple represents
         # `(input_status, expected_css_class)`
-        test_cases = [('unsubmitted', 'unanswered'),
-                      ('correct', 'correct'),
-                      ('incorrect', 'incorrect'),
-                      ('incomplete', 'incorrect')]
+        test_cases = [('unsubmitted', 'status unanswered'),
+                      ('correct', 'status correct'),
+                      ('incorrect', 'status incorrect'),
+                      ('incomplete', 'status incorrect')]
 
         for (input_status, expected_css_class) in test_cases:
             self.context['status'] = input_status
@@ -817,7 +817,7 @@ class ChoiceTextGroupTemplateTest(TemplateTestCase):
 
         # Should mark the entire problem correct
         xml = self.render_to_xml(self.context)
-        xpath = "//div[@class='indicator_container']/span[@class='correct']"
+        xpath = "//div[@class='indicator_container']/span[@class='status correct']"
         self.assert_has_xpath(xml, xpath, self.context)
 
         # Should NOT mark individual options
@@ -844,7 +844,7 @@ class ChoiceTextGroupTemplateTest(TemplateTestCase):
         for test_conditions in conditions:
             self.context.update(test_conditions)
             xml = self.render_to_xml(self.context)
-            xpath = "//div[@class='indicator_container']/span[@class='incorrect']"
+            xpath = "//div[@class='indicator_container']/span[@class='status incorrect']"
             self.assert_has_xpath(xml, xpath, self.context)
 
             # Should NOT mark individual options
@@ -875,7 +875,7 @@ class ChoiceTextGroupTemplateTest(TemplateTestCase):
         for test_conditions in conditions:
             self.context.update(test_conditions)
             xml = self.render_to_xml(self.context)
-            xpath = "//div[@class='indicator_container']/span[@class='unanswered']"
+            xpath = "//div[@class='indicator_container']/span[@class='status unanswered']"
             self.assert_has_xpath(xml, xpath, self.context)
 
             # Should NOT mark individual options

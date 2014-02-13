@@ -406,3 +406,9 @@ nav.sequence-bottom {
   }
 }
 
+.xblock-student_view {
+  &:focus,&:active {
+    outline: 0;
+  }
+}
+

@@ -18,6 +18,7 @@
    />
 
       <p class="status" aria-describedby="input_${id}">
+        ${value|h} -
         % if status == 'unsubmitted':
         unanswered
         % elif status == 'correct':
@@ -29,8 +30,7 @@
         % endif
       </p>
 
-      <div id="input_${id}_preview" class="equation">
-      </div>
+      <div id="input_${id}_preview" class="equation"></div>
   <p id="answer_${id}" class="answer"></p>
 
 % if status in ['unsubmitted', 'correct', 'incorrect', 'incomplete']:

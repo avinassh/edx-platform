@@ -129,11 +129,13 @@ class @Problem
 
   render: (content) ->
     if content
+      @el.attr({'aria-busy': 'true', 'aria-live': 'off', 'aria-atomic': 'false'})
       @el.html(content)
       JavascriptLoader.executeModuleScripts @el, () =>
         @setupInputTypes()
         @bind()
         @queueing()
+      @el.attr('aria-busy', 'false')
     else
       $.postWithPrefix "#{@url}/problem_get", (response) =>
         @el.html(response.html)
@@ -226,7 +228,8 @@ class @Problem
             required_files.splice(required_files.indexOf(file.name), 1)
           if file.size > max_filesize
             file_too_large = true
-            errors.push 'Your file "' + file.name '" is too large (max size: ' + max_filesize/(1000*1000) + ' MB)'
+            max_size = max_filesize / (1000*1000)
+            errors.push "Your file #{file.name} is too large (max size: {max_size}MB)"
           fd.append(element.id, file)
         if element.files.length == 0
           file_not_selected = true
@@ -285,6 +288,8 @@ class @Problem
           @updateProgress response
           if @el.hasClass 'showed'
             @el.removeClass 'showed'
+          window.SR.readElts($(response.contents).find('.status'))
+          @$('div.action input.check').focus()            
         else
           @gentle_alert response.success
       Logger.log 'problem_graded', [@answers, response.contents], @id
@@ -350,6 +355,7 @@ class @Problem
     alert_elem = "<div class='capa_alert'>" + msg + "</div>"
     @el.find('.action').after(alert_elem)
     @el.find('.capa_alert').css(opacity: 0).animate(opacity: 1, 700)
+    SR.readElts($('.capa_alert'))
 
   save: =>
     if not @check_save_waitfor(@save_internal)

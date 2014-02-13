@@ -7,6 +7,10 @@ describe 'Problem', ->
     @stubbedJax = root: jasmine.createSpyObj('jax.root', ['toMathML'])
     MathJax.Hub.getAllJax.andReturn [@stubbedJax]
     window.update_schematics = ->
+    # mock the screen reader alert
+    window.SR = 
+      readElts: `function(){}`
+      readText: `function(){}`
 
     # Load this function from spec/helper.coffee
     # Note that if your test fails with a message like:

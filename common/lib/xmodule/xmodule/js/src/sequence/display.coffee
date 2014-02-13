@@ -114,7 +114,7 @@ class @Sequence
       sequence_links = @content_container.find('a.seqnav')
       sequence_links.click @goto
       # Focus on the first available xblock.
-      @content_container.find('.vert .xblock :first').focus()
+      @content_container.find('.vert :first').attr('tabindex', '0').focus()
     @$("a.active").blur()  
     
   goto: (event) =>
@@ -193,10 +193,13 @@ class @Sequence
 
   mark_active: (position) ->
     # Mark the correct tab as selected, for a11y helpfulness.
-    @$("#sequence-list a[aria-selected='true']").attr("aria-selected", "false")
+    @$('#sequence-list [role="tab"]').attr({
+        # 'tabindex': '-1',
+        'aria-selected' : null
+        });
     # Don't overwrite class attribute to avoid changing Progress class
     element = @link_for(position)
     element.removeClass("inactive")
     .removeClass("visited")
     .addClass("active")
-    .attr("aria-selected", "true")
+    .attr({"aria-selected": "true", 'tabindex': '0'})

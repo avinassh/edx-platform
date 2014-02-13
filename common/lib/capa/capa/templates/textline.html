@@ -1,6 +1,6 @@
 <% doinline = "inline" if inline else "" %>
 
-<section id="inputtype_${id}" class="${'text-input-dynamath' if do_math else ''} capa_inputtype ${doinline} textline" >
+<div id="inputtype_${id}" class="${'text-input-dynamath' if do_math else ''} capa_inputtype ${doinline} textline" >
 
     % if preprocessor is not None:
     <div class="text-input-dynamath_data" data-preprocessor="${preprocessor['class_name']}"/>
@@ -33,7 +33,8 @@
    />
    ${trailing_text | h}
 
-      <p class="status" aria-describedby="input_${id}">
+      <p class="status" aria-describedby="input_${id}" aria-hidden="true">
+        ${value|h} -
         % if status == 'unsubmitted':
         unanswered
         % elif status == 'correct':
@@ -45,12 +46,11 @@
         % endif
       </p>
 
-      <p id="answer_${id}" class="answer"></p>
+      <p id="answer_${id}" class="answer" aria-hidden="true"></p>
 
       % if do_math:
       <div id="display_${id}" class="equation">`{::}`</div>
-      <textarea style="display:none" id="input_${id}_dynamath" name="input_${id}_dynamath">
-      </textarea>
+      <textarea style="display:none" id="input_${id}_dynamath" name="input_${id}_dynamath"></textarea>
 
       % endif
 
@@ -62,4 +62,4 @@
       <span class="message">${msg|n}</span>
   % endif
 
-</section>
+</div>

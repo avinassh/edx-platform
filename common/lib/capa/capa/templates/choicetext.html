@@ -11,13 +11,13 @@
     <div class="indicator_container">
     % if input_type == 'checkbox' or not element_checked:
         % if status == 'unsubmitted':
-        <span class="unanswered" style="display:inline-block;" id="status_${id}"></span>
+        <span class="status unanswered" style="display:inline-block;" id="status_${id}"></span>
         % elif status == 'correct':
-        <span class="correct" id="status_${id}"></span>
+        <span class="status correct" id="status_${id}"></span>
         % elif status == 'incorrect':
-        <span class="incorrect" id="status_${id}"></span>
+        <span class="status incorrect" id="status_${id}"></span>
         % elif status == 'incomplete':
-        <span class="incorrect" id="status_${id}"></span>
+        <span class="status incorrect" id="status_${id}"></span>
         % endif
     % endif
     </div>

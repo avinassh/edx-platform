@@ -9,7 +9,7 @@
         % endif
         />
 
-      <p class="status">${reported_status}</p>
+      <p class="status" aria-hidden="true"><span class="sr equation">${value|h}</span> - ${reported_status}</p>
 
       <div id="input_${id}_preview" class="equation">
         \[\]
