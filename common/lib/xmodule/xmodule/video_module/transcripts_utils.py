@@ -2,6 +2,7 @@
 Utility functions for transcripts.
 ++++++++++++++++++++++++++++++++++
 """
+import os
 import copy
 import json
 import requests
@@ -16,6 +17,8 @@ from xmodule.modulestore import Location
 
 log = logging.getLogger(__name__)
 
+class TranscriptException(Exception):
+    pass
 
 class TranscriptsGenerationException(Exception):
     pass

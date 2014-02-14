@@ -522,24 +522,16 @@ class TestVideoHandlers(TestVideo):
         self.assertEqual(response.body, 'Subs!')
 
     def test_translation_fails(self):
-        # no videoId
+        # No videoId
         request = Request.blank('/translation?language=ru')
         response = self.item_descriptor.transcript(request=request, dispatch='translation')
         self.assertEqual(response.status, '400 Bad Request')
 
-        # videoId not found
+        # Language is not in available languages
         request = Request.blank('/translation?language=ru&videoId=12345')
         response = self.item_descriptor.transcript(request=request, dispatch='translation')
         self.assertEqual(response.status, '404 Not Found')
 
-        #language is 'en' but self.sub is None
-        request = Request.blank('/translation?language=en&videoId=12345')
-        # to get instance
-        self.item_descriptor.render('student_view')
-        item = self.item_descriptor.xmodule_runtime.xmodule_instance
-        item.sub = ""
-        response = self.item_descriptor.transcript(request=request, dispatch='translation')
-        self.assertEqual(response.status, '404 Not Found')
 
     def test_translaton_en_success(self):
         subs = {"start": [10,], "end": [100,], "text": [ "Hi, welcome to Edx.",]}

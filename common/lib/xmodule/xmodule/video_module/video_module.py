@@ -39,7 +39,9 @@ from .transcripts_utils import (
     generate_srt_from_sjson,
     subs_filename,
     asset_location,
-    asset
+    asset,
+    get_or_create_sjson,
+    TranscriptException,
 )
 from .video_utils import create_youtube_string
 
@@ -47,9 +49,6 @@ from xmodule.modulestore.inheritance import InheritanceKeyValueStore
 from xblock.runtime import KvsFieldData
 
 log = logging.getLogger(__name__)
-
-class TranscriptException(Exception):
-    pass
 
 
 class VideoFields(object):
@@ -293,7 +292,7 @@ class VideoModule(VideoFields, XModule):
         })
 
 
-    def get_transcript(self, lang):
+    def get_transcript(self):
         """
         Returns transcript in *.srt format.
 
@@ -391,6 +390,7 @@ class VideoModule(VideoFields, XModule):
             en: subs_videoid.srt.sjson
             non_en: uk_subs_videoid.srt.sjson
         """
+        import ipdb; ipdb.set_trace()
         if self.transcript_language == 'en':
             return asset(self.location, subs_id).data
 
