@@ -21,6 +21,7 @@ def has_configuration_set():
     """
     return getattr(settings, "MICROSITE_CONFIGURATION", False)
 
+
 def get_configuration():
     """
     Returns the current request's microsite configuration
@@ -30,11 +31,13 @@ def get_configuration():
 
     return _microsite_configuration_threadlocal.data
 
+
 def is_request_in_microsite():
     """
     This will return if current request is a request within a microsite
     """
     return get_configuration()
+
 
 def get_value(val_name, default=None):
     """
@@ -42,6 +45,7 @@ def get_value(val_name, default=None):
     """
     configuration = get_configuration()
     return configuration.get(val_name, default)
+
 
 def get_template_path(relative_path):
     """
@@ -67,6 +71,7 @@ def get_template_path(relative_path):
 
     return relative_path
 
+
 def get_value_for_org(org, val_name, default=None):
     """
     This returns a configuration value for a microsite which has an org_filter that matches
@@ -80,6 +85,7 @@ def get_value_for_org(org, val_name, default=None):
         if org_filter == org:
             return value.get(val_name, default)
     return default
+
 
 def get_all_orgs():
     """
@@ -97,17 +103,23 @@ def get_all_orgs():
 
     return org_filter_set
 
+
 def clear():
     """
     Clears out any microsite configuration from the current request/thread
     """
     _microsite_configuration_threadlocal.data = {}
 
+
 def _set_current_microsite(microsite_config_key, subdomain, domain):
+    """
+    Helper internal method to actually put a microsite on the threadlocal
+    """
     config = settings.MICROSITE_CONFIGURATION[microsite_config_key].copy()
     config['subdomain'] = subdomain
     config['site_domain'] = domain
     _microsite_configuration_threadlocal.data = config
+
 
 def set_by_domain(domain):
     """
@@ -127,4 +139,4 @@ def set_by_domain(domain):
     # if no match on subdomain then see if there is a 'default' microsite defined
     # if so, then use that
     if 'default' in settings.MICROSITE_CONFIGURATION:
-            _set_current_microsite('default', subdomain, domain)
+        _set_current_microsite('default', subdomain, domain)

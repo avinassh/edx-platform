@@ -6,7 +6,7 @@ A microsite enables the following features:
 2) Present a landing page with a listing of courses that are specific to the 'brand'
 3) Ability to swap out some branding elements in the website
 """
-import microsite
+from microsite_configuration import microsite
 
 
 class MicrositeMiddleware(object):
