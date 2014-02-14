@@ -64,6 +64,14 @@ body.view-container  .content-primary{
         border-bottom: none;
         background: none;
       }
+
+      // STATE: nesting level xblock is collapsed
+      &.collapsed {
+        padding-bottom: 0;
+        background-color: $gray-l7;
+        box-shadow: 0 0 1px $shadow-d2 inset;
+
+      }
     }
 
     // CASE: element level xblock rendering
