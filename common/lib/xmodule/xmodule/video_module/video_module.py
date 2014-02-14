@@ -48,6 +48,9 @@ from xblock.runtime import KvsFieldData
 
 log = logging.getLogger(__name__)
 
+class TranscriptException(Exception):
+    pass
+
 
 class VideoFields(object):
     """Fields for `VideoModule` and `VideoDescriptor`."""
@@ -294,13 +297,12 @@ class VideoModule(VideoFields, XModule):
         """
         Returns transcript in *.srt format.
 
-        Args:
-            `lang`: str, 2 chars language id.
         Raises:
             - NotFoundError if cannot find transcript file in storage.
             - ValueError if transcript file is empty or incorrect JSON.
             - KeyError if transcript file has incorrect format.
         """
+        lang = self.transcript_l
         subs_id = self.sub if lang == 'en' else self.youtube_id_1_0
         data = asset(self.location, subs_id, lang).data
         str_subs = generate_srt_from_sjson(json.loads(data), speed=1.0)
@@ -318,10 +320,6 @@ class VideoModule(VideoFields, XModule):
         Request GET should contains 2-char language code for `download`
         and additionally `videoId` for `translation`.
         """
-        if dispatch not in ['download', 'translation']:
-            log.debug("Dispatch is not allowed")
-            return Response(status=404)
-
         if ('language' not in request.GET or
             'videoId' not in request.GET and dispatch == 'translation'):
             log.info("Invalid /transcript GET parameters.")
@@ -335,30 +333,32 @@ class VideoModule(VideoFields, XModule):
         if lang != self.transcript_language:
             self.transcript_language = lang
 
-        dispatcher = {
-            'download': self.download_to_student,
-            'translation': self.translation,
-        }
+        if dispatch == 'download':
+            try:
+                subs = self.get_transcript()
+            except (NotFoundError, ValueError, KeyError):
+                log.debug("Video@download exception")
+                response =  Response(status=404)
+            else:
+                response = Response(
+                    subs,
+                    headerlist=[
+                        ('Content-Disposition', 'attachment; filename="{0}.srt"'.format(self.transcript_language)),
+                    ]
+                )
+                response.content_type = "application/x-subrip"
+        elif dispatch == 'translation':
+            try:
+                response =  self.translation(request.GET.get('videoId'))
+            except TranscriptException as e:
+                log.info(e.msg)
+                response = Response(status=404)
+            else:
+                return response
+        else:  # unknown dispatch
+            log.debug("Dispatch is not allowed")
+            response =  Response(status=404)
 
-        return dispatcher[dispatch](request.GET)
-
-    def download_to_student(self, parameters):
-        """
-        This is called to get transcript file without timecodes to student.
-        """
-        try:
-            subs = self.get_transcript(self.transcript_language)
-        except (NotFoundError, ValueError, KeyError):
-            log.debug("Video@download exception")
-            return Response(status=404)
-
-        response = Response(
-            subs,
-            headerlist=[
-                ('Content-Disposition', 'attachment; filename="{0}.srt"'.format(self.transcript_language)),
-            ]
-        )
-        response.content_type = "application/x-subrip"
         return response
 
     def generate_sjson(self, user_filename, result_subs_dict):
@@ -408,25 +408,27 @@ class VideoModule(VideoFields, XModule):
         response.content_type = 'application/json'
         return response
 
-    def translation(self, multidict):
+    def translation(self, subs_id):
         """
         This is called to get transcript file for specific language.
 
-        multidict: webob multidict, contains 2 chars language code and video_id.
+        subs_id: str: must be on of:  self.sub or one of youtube_ids.
 
-        self.sub contains subtitles for html5 videos or
-        for youtube videos, if there is not html5 subtitles
+        Logic flow:
+
+        If english -> give back `sub` subtitles:
+            if subs_id != self.sub ->  this is youtube case with no subtitles
+        If non-english:
+
         """
-        video_id = multidict.get('videoId')
-        if self.transcript_language == 'en':
-            # for English, youtube and non-youtube, videos are associated with self.sub field
-            if self.sub:
-                response = Response(asset(self.location, self.sub).data)
-                response.content_type = 'application/json'
-                return response
-            else:
-                log.debug("transcript_translation is not available for language 'en'.")
-                return Response(status=404)
+        # for English, youtube and non-youtube, videos are associated with self.sub field
+        if self.transcript_language == 'en' and subs_id == self.sub:
+            response = Response(asset(self.location, self.sub).data)
+            response.content_type = 'application/json'
+            return response
+        else:
+            log.debug("transcript_translation is not available for language 'en'.")
+            return Response(status=404)
 
         # Non-English non-youtube  case:
         # Generate sjson if there is no one, and just give subtitles back.
@@ -461,19 +463,11 @@ class VideoModule(VideoFields, XModule):
                     save_subs_to_store(subs, video_id, self, self.transcript_language)
                     sjson_transcript = json.dumps(subs, indent=2)
             if video_id == self.youtube_id_1_0 or generate_1_0_version:  #generating for all speeds
-                try:
-                    self.generate_sjson(
-                        self.transcripts[self.transcript_language],
-                        {speed: video_id for video_id, speed in youtube_ids.iteritems()}
-                    )
-                    sjson_transcript =  asset(self.location, video_id, self.transcript_language).data
-
-                except NotFoundError:
-                    log.info("Can't find uploaded transcripts: %s", user_filename)
-                    return Response(status=404)
-                except Exception as exc:
-                    log.info(exc.message)
-                    return Response(status=404)
+                self.generate_sjson(
+                    self.transcripts[self.transcript_language],
+                    {speed: video_id for video_id, speed in youtube_ids.iteritems()}
+                )
+                sjson_transcript =  asset(self.location, video_id, self.transcript_language).data
 
         response = Response(sjson_transcript)
         response.content_type = 'application/json'
