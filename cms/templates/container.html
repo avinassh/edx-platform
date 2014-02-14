@@ -76,21 +76,3 @@ from django.utils.translation import ugettext as _
 </div>
 
 </%block>
-
-<%block name="view_alerts">
-<!-- alert: save confirmed with close -->
-<div class="wrapper wrapper-alert wrapper-alert-confirmation" role="status">
-    <div class="alert confirmation">
-        <i class="icon-ok"></i>
-
-        <div class="copy">
-            <h2 class="title title-3">${_('Your file has been deleted.')}</h2>
-        </div>
-
-        <a href="" rel="view" class="action action-alert-close">
-            <i class="icon-remove-sign"></i>
-            <span class="label">${_('close alert')}</span>
-        </a>
-    </div>
-</div>
-</%block>

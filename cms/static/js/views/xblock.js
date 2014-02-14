@@ -1,5 +1,5 @@
-define(["domReady", "jquery", "underscore", "gettext", "js/views/baseview", "xblock/runtime.v1"],
-    function (domReady, $, _, gettext, BaseView, XBlock) {
+define(["jquery", "underscore", "js/views/baseview", "xblock/runtime.v1"],
+    function ($, _, BaseView, XBlock) {
 
         var XBlockView = BaseView.extend({
             // takes XBlockInfo as a model
