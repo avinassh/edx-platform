@@ -396,3 +396,45 @@ def asset(location, subs_id, lang='en'):
             subs_filename(subs_id, lang)
         )
     )
+
+
+def generate_sjson_for_all_speeds(item, user_filename, result_subs_dict):
+    """
+    Generates sjson from srt.
+
+    `item` is module object.
+    """
+    try:
+        srt_transcripts = contentstore().find(asset_location(item.location, user_filename))
+    except NotFoundError as e:
+        raise TranscriptException("{}: Can't find uploaded transcripts: {}".format(e.message, user_filename))
+
+    generate_subs_from_source(
+        result_subs_dict,
+        os.path.splitext(user_filename)[1][1:],
+        srt_transcripts.data.decode('utf8'),
+        item,
+        item.transcript_language
+    )
+
+def get_or_create_sjson(item):
+    """
+    Get sjson if already exists, otherwise generate it.
+
+    Generate sjson with subs_id name, from user uploaded srt.
+    Subs_id is extracted from srt filename, which was set by user.
+
+    Raises:
+        TranscriptException: when srt subtitles do not exist,
+        and exceptions from generate_subs_from_source.
+
+    `item` is module object.
+    """
+    user_subs_id = os.path.splitext(item.transcripts[item.transcript_language])[0]
+    source_subs_id, result_subs_dict = user_subs_id, {1.0: user_subs_id}
+    try:
+        sjson_transcript = asset(item.location, source_subs_id, item.transcript_language).data
+    except (NotFoundError):  # generating sjson from srt
+        generate_sjson_for_all_speeds(item, source_subs_id, result_subs_dict)
+    sjson_transcript = asset(item.location, source_subs_id, item.transcript_language).data
+    return sjson_transcript

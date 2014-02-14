@@ -362,42 +362,6 @@ class VideoModule(VideoFields, XModule):
 
         return response
 
-    def generate_sjson_for_all_speeds(self, user_filename, result_subs_dict):
-        """
-        Generates sjson from srt.
-        """
-        try:
-            srt_transcripts = contentstore().find(asset_location(self.location, user_filename))
-        except NotFoundError as e:
-            raise TranscriptException("{}: Can't find uploaded transcripts: {}".format(e.message, user_filename))
-
-        generate_subs_from_source(
-            result_subs_dict,
-            os.path.splitext(user_filename)[1][1:],
-            srt_transcripts.data.decode('utf8'),
-            self,
-            self.transcript_language
-        )
-
-    def get_or_create_sjson(self):
-        """
-        Get sjson if already exists, otherwise generate it.
-
-        Generate sjson with subs_id name, from user uploaded srt.
-        Subs_id is extracted from srt filename, which was set by user.
-
-        Raises:
-            TranscriptException: when srt subtitles do not exist,
-            and exceptions from generate_subs_from_source.
-        """
-        user_subs_id = os.path.splitext(self.transcripts[self.transcript_language])[0]
-        source_subs_id, result_subs_dict = user_subs_id, {1.0: user_subs_id})
-        try:
-            sjson_transcript = asset(self.location, source_subs_id, self.transcript_language).data
-        except (NotFoundError):  # generating sjson from srt
-            self.generate_sjson(user_filename, result_subs_dict)
-        sjson_transcript = asset(self.location, source_subs_id, self.transcript_language).data
-        return sjson_transcript
 
     def translation(self, subs_id):
         """
