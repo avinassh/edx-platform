@@ -9,14 +9,6 @@ from django.utils.translation import ugettext as _
 <%namespace name='static' file='static_content.html'/>
 <%namespace name="units" file="widgets/units.html" />
 
-<%block name="header_extras">
-% for template_name in [ ]:
-<script type="text/template" id="${template_name}-tpl">
-    <%static:include path="js/${template_name}.underscore" />
-</script>
-% endfor
-</%block>
-
 <%block name="jsextra">
 <script type='text/javascript'>
     require(["domReady!", "jquery", "js/models/xblock_info", "js/views/xblock",
@@ -50,7 +42,6 @@ from django.utils.translation import ugettext as _
             <small class="navigation navigation-parents">
                 <a href="${parent_url}" class="navigation-link navigation-parent">${parent_display_name}</a>
                 <a href="#" class="navigation-link navigation-current">${container_display_name}</a>
-
             </small>
         </h1>
 
@@ -58,7 +49,7 @@ from django.utils.translation import ugettext as _
             <h3 class="sr">${_("Page Actions")}</h3>
             <ul>
                 <li class="sr nav-item">
-                    No Actions
+                    ${_{"No Actions")}
                 </li>
             </ul>
         </nav>

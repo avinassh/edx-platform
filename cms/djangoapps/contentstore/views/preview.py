@@ -166,9 +166,10 @@ def _studio_wrap_xblock(xblock, view, frag, context, display_name_only=False):
         'content': xblock.display_name if display_name_only else frag.content,
     }
     if xblock.category == 'vertical':
-        html = render_to_string('studio_vertical_wrapper.html', template_context)
+        template = 'studio_vertical_wrapper.html'
     else:
-        html = render_to_string('studio_xblock_wrapper.html', template_context)
+        template = 'studio_xblock_wrapper.html'
+    html = render_to_string(template, template_context)
     return wrap_fragment(frag, html)
 
 

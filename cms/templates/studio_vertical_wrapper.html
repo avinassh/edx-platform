@@ -19,6 +19,6 @@
     <article class="xblock-render">
 ${content}
     </article>
-% if xblock != xblock_context['root_xblock']:
+% if xblock.location != xblock_context['root_xblock'].location:
 </section>
 % endif

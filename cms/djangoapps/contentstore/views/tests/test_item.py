@@ -96,14 +96,14 @@ class GetItem(ItemTest):
         html = resp_content['html']
         self.assertTrue(html)
         resources = resp_content['resources']
-        self.assertIsNot(resources, None)
+        self.assertIsNotNone(resources)
 
         # Verify that the Studio wrapper is not added
-        self.assertFalse('xblock-wrapper' in html)
+        self.assertNotIn('xblock-wrapper', html)
 
         # Verify that the header and article tags are still added
-        self.assertTrue('<header class="xblock-header">' in html)
-        self.assertTrue('<article class="xblock-render">' in html)
+        self.assertIn('<header class="xblock-header">', html)
+        self.assertIn('<article class="xblock-render">', html)
 
     def test_get_container_fragment(self):
         # Add a vertical
@@ -130,15 +130,15 @@ class GetItem(ItemTest):
         html = resp_content['html']
         resources = resp_content['resources']
         self.assertTrue(html)
-        self.assertIsNot(resources, None)
+        self.assertIsNotNone(resources)
 
         # Verify that the Studio nesting wrapper has been added
-        self.assertTrue('xblock-wrapper-nestinglevel' in html)
-        self.assertTrue('<header class="xblock-header">' in html)
-        self.assertTrue('<article class="xblock-render">' in html)
+        self.assertIn('xblock-wrapper-nestinglevel', html)
+        self.assertIn('<header class="xblock-header">', html)
+        self.assertIn('<article class="xblock-render">', html)
 
         # Verify that the Studio element wrapper has been added
-        self.assertTrue('xblock-wrapper-elementlevel' in html)
+        self.assertIn('xblock-wrapper-elementlevel', html)
 
 
 class DeleteItem(ItemTest):

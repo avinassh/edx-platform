@@ -128,8 +128,6 @@ def xblock_handler(request, tag=None, package_id=None, branch=None, version_guid
                     'root_xblock': component
                 }
 
-                store.save_xmodule(component)
-
                 preview_fragment = get_preview_fragment(request, component, context)
 
                 hashed_resources = OrderedDict()
@@ -151,7 +149,7 @@ def xblock_handler(request, tag=None, package_id=None, branch=None, version_guid
                         log.debug("Unable to render studio_view for %r", component, exc_info=True)
                         editor_fragment = Fragment(render_to_string('html_error.html', {'message': str(exc)}))
 
-                    modulestore().save_xmodule(component)
+                    store.save_xmodule(component)
 
                     for resource in editor_fragment.resources:
                         hashed_resources[hash_resource(resource)] = resource

@@ -326,14 +326,6 @@ def container_handler(request, tag=None, package_id=None, branch=None, version_g
         except ItemNotFoundError:
             return HttpResponseBadRequest()
 
-        components = [
-            loc_mapper().translate_location(
-                course.location.course_id, component.location, False, True
-            )
-            for component
-            in item.get_children()
-        ]
-
         parent_locators = modulestore().get_parent_locations(old_location, None)
         parent_xblock = modulestore().get_item(parent_locators[0])
         parent_url = xblock_studio_url(parent_xblock)
@@ -345,17 +337,6 @@ def container_handler(request, tag=None, package_id=None, branch=None, version_g
             'parent_display_name': parent_xblock.display_name,
             'parent_url': parent_url,
             'container_category': item.category,
-            'components': components,
-            'release_date': (
-                get_default_time_display(parent_xblock.start)
-                if parent_xblock.start is not None else None
-            ),
-            'new_unit_category': 'vertical',
-            'unit_state': compute_unit_state(item),
-            'published_date': (
-                get_default_time_display(item.published_date)
-                if item.published_date is not None else None
-            ),
         })
     else:
         return HttpResponseBadRequest("Only supports html requests")
