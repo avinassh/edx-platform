@@ -433,6 +433,7 @@ Follow these XML guidelines:
 
 * For each ``<solution>`` element, add an ``explanation-id`` attribute and value that maps back to a correct answer. For example, ``<solution explanation-id="iPod">``.
 
+.. note:: If the choices include only one correct answer, you do not have to use the ``explanation-id`` in either the ``choice`` or ``<solution>`` element. You also do use the ``<solutionset>`` element to wrap the ``<solution>`` element.
 
 For example, for the following multiple choice problem, a student will see four choices, and in each set one of the choices will be one of the two correct ones. The explanation shown for the correct answer is the one with the same explanation ID.
 
