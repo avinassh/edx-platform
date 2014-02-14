@@ -395,7 +395,7 @@ class VideoModule(VideoFields, XModule):
             return asset(self.location, subs_id).data
 
         if not self.youtube_id_1_0:  # Non-youtube (HTML5) case:
-            return self.get_or_create_sjson()
+            return get_or_create_sjson(self)
 
         # Youtube case:
         yt_ids = [self.youtube_id_0_75, self.youtube_id_1_0, self.youtube_id_1_25, self.youtube_id_1_5]
@@ -429,7 +429,8 @@ class VideoModule(VideoFields, XModule):
                 sjson_transcript = json.dumps(subs, indent=2)
                 return sjson_transcript
 
-        self.generate_sjson_for_all_speeds(
+        generate_sjson_for_all_speeds(
+            self,
             self.transcripts[self.transcript_language],
             {speed: subs_id for subs_id, speed in youtube_ids.iteritems()}
         )
