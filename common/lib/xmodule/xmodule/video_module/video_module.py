@@ -349,12 +349,13 @@ class VideoModule(VideoFields, XModule):
                 response.content_type = "application/x-subrip"
         elif dispatch == 'translation':
             try:
-                response =  self.translation(request.GET.get('videoId'))
+                transcript =  self.translation(request.GET.get('videoId'))
             except TranscriptException as e:
                 log.info(e.msg)
                 response = Response(status=404)
             else:
-                return response
+                response = Response(transcript)
+                response.content_type = 'application/json'
         else:  # unknown dispatch
             log.debug("Dispatch is not allowed")
             response =  Response(status=404)
@@ -399,14 +400,8 @@ class VideoModule(VideoFields, XModule):
         try:
             sjson_transcript = self.get_sjson(user_filename, user_subs_id, {1.0: user_subs_id})
         except NotFoundError:
-            log.info("Can't find uploaded transcripts: %s", user_filename)
-            return Response(status=404)
-        except Exception as exc:
-            log.info(exc.message)
-            return Response(status=404)
-        response = Response(sjson_transcript)
-        response.content_type = 'application/json'
-        return response
+            raise TranscriptException("Can't find uploaded transcripts: {}".format(user_filename))
+        return sjson_transcript
 
     def translation(self, subs_id):
         """
@@ -427,9 +422,7 @@ class VideoModule(VideoFields, XModule):
         """
         # for English, youtube and non-youtube, videos are associated with self.sub field
         if self.transcript_language == 'en' and subs_id == self.sub:
-            response = Response(asset(self.location, self.sub).data)
-            response.content_type = 'application/json'
-            return response
+            return asset(self.location, self.sub).data
         else:
             raise TranscriptException("transcript translation is not available for language 'en'.")
 
@@ -445,13 +438,13 @@ class VideoModule(VideoFields, XModule):
         yt_speeds = [0.75, 1.00, 1.25, 1.50]
         youtube_ids = {p[0]: p[1] for p in zip(yt_ids, yt_speeds) if p[0]}
         try:
-            sjson_transcript = asset(self.location, video_id, self.transcript_language).data
+            sjson_transcript = asset(self.location, subs_id, self.transcript_language).data
         except (NotFoundError):  # generating sjson
             generate_1_0_version = False
-            log.info("Can't find content in storage for %s transcript: generating.", video_id)
+            log.info("Can't find content in storage for %s transcript: generating.", subs_id)
 
             # check if sjson version of transcript for 1.0 speed exists.
-            if video_id != self.youtube_id_1_0:
+            if subs_id != self.youtube_id_1_0:
                 content_location_1_0 = asset_location(
                     self.location,
                     subs_filename(self.youtube_id_1_0, self.transcript_language)
@@ -462,15 +455,15 @@ class VideoModule(VideoFields, XModule):
                     generate_1_0_version = True
                 else:  # this is faster than generate for all speeds
                     source_subs = json.loads(contentstore().find(content_location_1_0).data)
-                    subs = generate_subs(youtube_ids[video_id], 1.0, source_subs)
-                    save_subs_to_store(subs, video_id, self, self.transcript_language)
+                    subs = generate_subs(youtube_ids[subs_id], 1.0, source_subs)
+                    save_subs_to_store(subs, subs_id, self, self.transcript_language)
                     sjson_transcript = json.dumps(subs, indent=2)
-            if video_id == self.youtube_id_1_0 or generate_1_0_version:  #generating for all speeds
+            if subs_id == self.youtube_id_1_0 or generate_1_0_version:  #generating for all speeds
                 self.generate_sjson(
                     self.transcripts[self.transcript_language],
-                    {speed: video_id for video_id, speed in youtube_ids.iteritems()}
+                    {speed: subs_id for subs_id, speed in youtube_ids.iteritems()}
                 )
-                sjson_transcript =  asset(self.location, video_id, self.transcript_language).data
+                sjson_transcript =  asset(self.location, subs_id, self.transcript_language).data
 
         response = Response(sjson_transcript)
         response.content_type = 'application/json'
