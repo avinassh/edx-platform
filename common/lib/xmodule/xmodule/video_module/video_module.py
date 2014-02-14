@@ -422,9 +422,9 @@ class VideoModule(VideoFields, XModule):
         """
         # for English, youtube and non-youtube, videos are associated with self.sub field
         if self.transcript_language == 'en':
-                return asset(self.location, self.sub).data
-            else:
-                raise TranscriptException("transcript translation is not available for language 'en'.")
+            return asset(self.location, self.sub).data
+        else:
+            raise TranscriptException("transcript translation is not available for language 'en'.")
 
         # Non-English non-youtube  case:
         # Generate sjson if there is no one, and just give subtitles back.
@@ -471,8 +471,6 @@ class VideoDescriptor(VideoFields, TabsEditingDescriptor, EmptyDataRawDescriptor
     """Descriptor for `VideoModule`."""
     module_class = VideoModule
     transcript = module_attr('transcript')
-    # download_transcript = module_attr('download_transcript')
-    # transcript_translation = module_attr('transcript_translation')
 
     tabs = [
         {
@@ -487,7 +485,7 @@ class VideoDescriptor(VideoFields, TabsEditingDescriptor, EmptyDataRawDescriptor
     ]
 
     def __init__(self, *args, **kwargs):
-        '''
+        """
         Mostly handles backward compatibility issues.
 
         `source` is deprecated field.
@@ -497,7 +495,7 @@ class VideoDescriptor(VideoFields, TabsEditingDescriptor, EmptyDataRawDescriptor
         b) If `source` is cleared it is not shown anymore.
         c) If `source` exists and `source` in `html5_sources`, do not show `source`
             field. `download_video` field has value True.
-        '''
+        """
         super(VideoDescriptor, self).__init__(*args, **kwargs)
         # For backwards compatibility -- if we've got XML data, parse
         # it out and set the metadata fields
