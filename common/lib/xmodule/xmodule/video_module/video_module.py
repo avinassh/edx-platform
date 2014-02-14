@@ -421,10 +421,10 @@ class VideoModule(VideoFields, XModule):
             non_en: uk_subs_videoid.srt.sjson
         """
         # for English, youtube and non-youtube, videos are associated with self.sub field
-        if self.transcript_language == 'en' and subs_id == self.sub:
-            return asset(self.location, self.sub).data
-        else:
-            raise TranscriptException("transcript translation is not available for language 'en'.")
+        if self.transcript_language == 'en':
+                return asset(self.location, self.sub).data
+            else:
+                raise TranscriptException("transcript translation is not available for language 'en'.")
 
         # Non-English non-youtube  case:
         # Generate sjson if there is no one, and just give subtitles back.
@@ -442,7 +442,6 @@ class VideoModule(VideoFields, XModule):
         except (NotFoundError):  # generating sjson
             generate_1_0_version = False
             log.info("Can't find content in storage for %s transcript: generating.", subs_id)
-
             # check if sjson version of transcript for 1.0 speed exists.
             if subs_id != self.youtube_id_1_0:
                 content_location_1_0 = asset_location(
@@ -465,10 +464,7 @@ class VideoModule(VideoFields, XModule):
                 )
                 sjson_transcript =  asset(self.location, subs_id, self.transcript_language).data
 
-        response = Response(sjson_transcript)
-        response.content_type = 'application/json'
-        return response
-
+        return sjson_transcript
 
 
 class VideoDescriptor(VideoFields, TabsEditingDescriptor, EmptyDataRawDescriptor):
