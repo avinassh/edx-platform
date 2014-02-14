@@ -80,6 +80,66 @@ class GetItem(ItemTest):
         resp = self.client.get('/xblock/' + resp_content['locator'])
         self.assertEqual(resp.status_code, 200)
 
+    def test_get_empty_container_fragment(self):
+        # Add a vertical
+        resp = self.create_xblock(category='vertical')
+        self.assertEqual(resp.status_code, 200)
+
+        # Retrieve it
+        resp_content = json.loads(resp.content)
+        root_locator = resp_content['locator']
+
+        # Get the root container fragment
+        resp = self.client.get('/xblock/' + root_locator, HTTP_ACCEPT='application/container-x-fragment+json')
+        self.assertEqual(resp.status_code, 200)
+        resp_content = json.loads(resp.content)
+        html = resp_content['html']
+        self.assertTrue(html)
+        resources = resp_content['resources']
+        self.assertIsNot(resources, None)
+
+        # Verify that the Studio wrapper is not added
+        self.assertFalse('xblock-wrapper' in html)
+
+        # Verify that the header and article tags are still added
+        self.assertTrue('<header class="xblock-header">' in html)
+        self.assertTrue('<article class="xblock-render">' in html)
+
+    def test_get_container_fragment(self):
+        # Add a vertical
+        resp = self.create_xblock(category='vertical')
+        self.assertEqual(resp.status_code, 200)
+
+        # Retrieve it
+        resp_content = json.loads(resp.content)
+        root_locator = resp_content['locator']
+
+        # Add a child vertical
+        resp = self.create_xblock(category='vertical', parent_locator=root_locator)
+        child_vertical_locator = self.response_locator(resp)
+        self.assertEqual(resp.status_code, 200)
+
+        # Add a problem to the child vertical
+        resp = self.create_xblock(parent_locator=child_vertical_locator, category='problem', boilerplate='multiplechoice.yaml')
+        self.assertEqual(resp.status_code, 200)
+
+        # Get the root container fragment
+        resp = self.client.get('/xblock/' + root_locator, HTTP_ACCEPT='application/container-x-fragment+json')
+        self.assertEqual(resp.status_code, 200)
+        resp_content = json.loads(resp.content)
+        html = resp_content['html']
+        resources = resp_content['resources']
+        self.assertTrue(html)
+        self.assertIsNot(resources, None)
+
+        # Verify that the Studio nesting wrapper has been added
+        self.assertTrue('xblock-wrapper-nestinglevel' in html)
+        self.assertTrue('<header class="xblock-header">' in html)
+        self.assertTrue('<article class="xblock-render">' in html)
+
+        # Verify that the Studio element wrapper has been added
+        self.assertTrue('xblock-wrapper-elementlevel' in html)
+
 
 class DeleteItem(ItemTest):
     """Tests for '/xblock' DELETE url."""
