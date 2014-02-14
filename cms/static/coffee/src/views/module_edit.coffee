@@ -1,8 +1,8 @@
 define ["jquery", "underscore", "gettext", "xblock/runtime.v1",
-        "js/views/baseview", "js/views/feedback_notification", "js/views/metadata", "js/collections/metadata"
+        "js/views/xblock", "js/views/feedback_notification", "js/views/metadata", "js/collections/metadata"
         "js/utils/modal", "jquery.inputnumber"],
-($, _, gettext, XBlock, BaseView, NotificationView, MetadataView, MetadataCollection, ModalUtils) ->
-  class ModuleEdit extends BaseView
+($, _, gettext, XBlock, XBlockView, NotificationView, MetadataView, MetadataCollection, ModalUtils) ->
+  class ModuleEdit extends XBlockView
     tagName: 'li'
     className: 'component'
     editorMode: 'editor-mode'

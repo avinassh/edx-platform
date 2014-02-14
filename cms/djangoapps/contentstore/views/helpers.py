@@ -43,9 +43,7 @@ def xblock_studio_url(xblock):
     Returns the Studio editing URL for the specified xblock.
     """
     category = xblock.category
-    locator = loc_mapper().translate_location(None, xblock.location)
-    old_location = loc_mapper().translate_locator_to_location(locator)
-    parent_locators = modulestore().get_parent_locations(old_location, None)
+    parent_locators = modulestore().get_parent_locations(xblock.location, None)
     parent_xblock = modulestore().get_item(parent_locators[0])
     parent_category = parent_xblock.category
     if category == 'course':
@@ -58,4 +56,5 @@ def xblock_studio_url(xblock):
         prefix = 'container'
     if not prefix:
         return None
-    return locator.url_reverse(prefix + '/', '')
+    location = loc_mapper().translate_location(None, xblock.location)
+    return location.url_reverse(prefix + '/', '')

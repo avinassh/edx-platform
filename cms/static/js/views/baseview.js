@@ -1,6 +1,5 @@
-define(["jquery", "underscore", "backbone", "js/utils/handle_iframe_binding",
-        "xblock/runtime.v1"],
-    function ($, _, Backbone, IframeUtils, XBlock) {
+define(["jquery", "underscore", "backbone", "js/utils/handle_iframe_binding"],
+    function ($, _, Backbone, IframeUtils) {
         /*  This view is extended from backbone with custom functions 'beforeRender' and 'afterRender'. It allows other
          views, which extend from it to access these custom functions. 'afterRender' function of BaseView calls a utility
          function 'iframeBinding' which modifies iframe src urls on a page so that they are rendered as part of the DOM.
@@ -43,67 +42,6 @@ define(["jquery", "underscore", "backbone", "js/utils/handle_iframe_binding",
                 event.preventDefault();
                 target.toggleClass('expand').toggleClass('collapse');
                 target.closest('.is-collapsible, .window').toggleClass('collapsed');
-            },
-
-            /**
-             * Initializes the XBlock that has been rendered within the specified element.
-             * @param element The wrapper element that contains the XBlock
-             */
-            initializeXBlock: function(element) {
-                XBlock.initializeBlock(element.find('.xblock-student_view'));
-            },
-
-            /**
-             * Renders an xblock fragment into the specifed element. The fragment has two attributes:
-             *   html: the HTML to be rendered
-             *   resources: any JavaScript or CSS resources that the HTML depends upon
-             * @param fragment The fragment returned from the xblock_handler
-             * @param element The element into which to render the fragment (defaults to this.$el)
-             */
-            renderXBlockFragment: function(fragment, element) {
-                var applyResource, i, len, resources, resource, xblockElement;
-                if (!element) {
-                    element = this.$el;
-                }
-
-                applyResource = function(value) {
-                    var hash, resource, head;
-                    hash = value[0];
-                    if (!window.loadedXBlockResources) {
-                        window.loadedXBlockResources = [];
-                    }
-                    if (_.indexOf(window.loadedXBlockResources, hash) < 0) {
-                        resource = value[1];
-                        head = $('head');
-                        if (resource.mimetype === "text/css") {
-                            if (resource.kind === "text") {
-                                head.append("<style type='text/css'>" + resource.data + "</style>");
-                            } else if (resource.kind === "url") {
-                                head.append("<link rel='stylesheet' href='" + resource.data + "' type='text/css'>");
-                            }
-                        } else if (resource.mimetype === "application/javascript") {
-                            if (resource.kind === "text") {
-                                head.append("<script>" + resource.data + "</script>");
-                            } else if (resource.kind === "url") {
-                                $.getScript(resource.data);
-                            }
-                        } else if (resource.mimetype === "text/html") {
-                            if (resource.placement === "head") {
-                                head.append(resource.data);
-                            }
-                        }
-                        window.loadedXBlockResources.push(hash);
-                    }
-                };
-
-                element.html(fragment.html);
-                resources = fragment.resources;
-                for (i = 0, len = resources.length; i < len; i++) {
-                    resource = resources[i];
-                    applyResource(resource);
-                }
-                this.initializeXBlock(element);
-                return this.delegateEvents();
             }
         });
 
