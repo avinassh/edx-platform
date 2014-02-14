@@ -361,3 +361,38 @@ def manage_video_subtitles_save(old_item, new_item, user):
                 "original file does not exist.",
                 sub_name, video_id
             )
+
+
+def subs_filename(subs_id, lang='en'):
+    """
+    Generate proper filename for storage.
+    """
+    if lang == 'en':
+        return 'subs_{0}.srt.sjson'.format(subs_id)
+    else:
+        return '{0}_subs_{1}.srt.sjson'.format(lang, subs_id)
+
+
+def asset_location(location, filename):
+    """
+    Return asset location.
+
+    `location` is module location.
+    """
+    return StaticContent.compute_location(
+        location.org, location.course, filename
+    )
+
+
+def asset(location, subs_id, lang='en'):
+    """
+    Get asset from contentstore, asset location is build from subs_id and lang.
+
+    `location` is module location.
+    """
+    return contentstore().find(
+        asset_location(
+            location,
+            subs_filename(subs_id, lang)
+        )
+    )
