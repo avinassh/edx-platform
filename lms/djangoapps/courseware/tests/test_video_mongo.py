@@ -655,7 +655,7 @@ class TestVideoGetTranscriptsMethod(TestVideo):
 
         _upload_sjson_file(good_sjson, self.item_descriptor.location)
         item.sub = _get_subs_id(good_sjson.name)
-        text = item.get_transcript('en')
+        text = item.get_transcript()
         expected_text = textwrap.dedent("""\
             0
             00:00:00,270 --> 00:00:02,720
@@ -674,7 +674,7 @@ class TestVideoGetTranscriptsMethod(TestVideo):
         item = self.item_descriptor.xmodule_runtime.xmodule_instance
 
         with self.assertRaises(NotFoundError):
-            item.get_transcript('en')
+            item.get_transcript()
 
     def test_value_error(self):
         self.item_descriptor.render('student_view')
@@ -686,7 +686,7 @@ class TestVideoGetTranscriptsMethod(TestVideo):
         item.sub = _get_subs_id(good_sjson.name)
 
         with self.assertRaises(ValueError):
-            item.get_transcript('en')
+            item.get_transcript()
 
     def test_key_error(self):
         self.item_descriptor.render('student_view')
@@ -709,7 +709,7 @@ class TestVideoGetTranscriptsMethod(TestVideo):
         item.sub = _get_subs_id(good_sjson.name)
 
         with self.assertRaises(KeyError):
-            item.get_transcript('en')
+            item.get_transcript()
 
 def _clear_assets(location):
     store = contentstore()

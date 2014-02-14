@@ -42,6 +42,7 @@ from .transcripts_utils import (
     asset,
     get_or_create_sjson,
     TranscriptException,
+    generate_sjson_for_all_speeds,
 )
 from .video_utils import create_youtube_string
 
