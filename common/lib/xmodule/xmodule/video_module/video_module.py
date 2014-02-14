@@ -351,7 +351,7 @@ class VideoModule(VideoFields, XModule):
             try:
                 transcript =  self.translation(request.GET.get('videoId'))
             except TranscriptException as e:
-                log.info(e.msg)
+                log.info(e.message)
                 response = Response(status=404)
             else:
                 response = Response(transcript)
@@ -369,7 +369,7 @@ class VideoModule(VideoFields, XModule):
         try:
             srt_transcripts = contentstore().find(asset_location(self.location, user_filename))
         except NotFoundError as e:
-            raise TranscriptException(e.msg + ": Can't find uploaded transcripts: {}".format(user_filename))
+            raise TranscriptException("{}: Can't find uploaded transcripts: {}".format(e.message, user_filename))
 
         generate_subs_from_source(
             result_subs_dict,
