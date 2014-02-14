@@ -275,7 +275,7 @@ To add shuffling to this problem, add ``!`` in parenthesis of the first answer::
      (x) The iPod
      ( ) The vegetable peeler
 
-To fix an answer's location in the list, add ``@`` in parenthesis of the that answer::
+To fix an answer's location in the list, add ``@`` in parenthesis of that answer::
 
  What Apple device competed with the portable CD player?
      (!) The iPad
