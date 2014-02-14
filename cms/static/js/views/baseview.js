@@ -1,4 +1,5 @@
-define(["jquery", "underscore", "backbone", "js/utils/handle_iframe_binding", "xblock/runtime.v1"],
+define(["jquery", "underscore", "backbone", "js/utils/handle_iframe_binding",
+        "xblock/runtime.v1"],
     function ($, _, Backbone, IframeUtils, XBlock) {
         /*  This view is extended from backbone with custom functions 'beforeRender' and 'afterRender'. It allows other
          views, which extend from it to access these custom functions. 'afterRender' function of BaseView calls a utility
@@ -60,7 +61,7 @@ define(["jquery", "underscore", "backbone", "js/utils/handle_iframe_binding", "x
              * @param element The element into which to render the fragment (defaults to this.$el)
              */
             renderXBlockFragment: function(fragment, element) {
-                var value, applyResource, i, len, resources, resource, xblockElement;
+                var applyResource, i, len, resources, resource, xblockElement;
                 if (!element) {
                     element = this.$el;
                 }

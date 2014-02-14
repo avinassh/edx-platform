@@ -12,7 +12,8 @@ from contentstore.views.helpers import xblock_studio_url
 
 <%block name="jsextra">
   <script type='text/javascript'>
-require(["domReady!", "jquery", "js/models/module_info", "coffee/src/views/unit", "jquery.ui"],
+require(["domReady!", "jquery", "js/models/module_info", "coffee/src/views/unit", "jquery.ui",
+        "xmodule", "coffee/src/main", "xblock/cms.runtime.v1"],
     function(doc, $, ModuleModel, UnitEditView, ui) {
   window.unit_location_analytics = '${unit_locator}';
 
