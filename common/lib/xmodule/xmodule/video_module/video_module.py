@@ -390,7 +390,6 @@ class VideoModule(VideoFields, XModule):
             en: subs_videoid.srt.sjson
             non_en: uk_subs_videoid.srt.sjson
         """
-        import ipdb; ipdb.set_trace()
         if self.transcript_language == 'en':
             return asset(self.location, subs_id).data
 
