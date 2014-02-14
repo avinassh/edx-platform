@@ -99,7 +99,7 @@ class GetItem(ItemTest):
         self.assertIsNotNone(resources)
 
         # Verify that the Studio wrapper is not added
-        self.assertNotIn('xblock-wrapper', html)
+        self.assertNotIn('wrapper-xblock', html)
 
         # Verify that the header and article tags are still added
         self.assertIn('<header class="xblock-header">', html)
@@ -133,12 +133,12 @@ class GetItem(ItemTest):
         self.assertIsNotNone(resources)
 
         # Verify that the Studio nesting wrapper has been added
-        self.assertIn('xblock-wrapper-nestinglevel', html)
+        self.assertIn('level-nesting', html)
         self.assertIn('<header class="xblock-header">', html)
         self.assertIn('<article class="xblock-render">', html)
 
         # Verify that the Studio element wrapper has been added
-        self.assertIn('xblock-wrapper-elementlevel', html)
+        self.assertIn('level-element', html)
 
 
 class DeleteItem(ItemTest):

@@ -24,7 +24,7 @@ from django.utils.translation import ugettext as _
                     category: '${container_category}'
                 });
                 view = new XBlockView({
-                    el: $('.xblock-wrapper-pagelevel').first(),
+                    el: $('.wrapper-xblock.level-page').first(),
                     model: model
                 });
                 view.render();
@@ -61,7 +61,7 @@ from django.utils.translation import ugettext as _
         <section class="content-area">
 
             <article class="content-primary">
-                <section class="xblock-wrapper xblock-wrapper-pagelevel" data-locator="${container_locator}"/>
+                <section class="wrapper-xblock level-page" data-locator="${container_locator}"/>
             </article>
             <aside class="content-supplementary" role="complimentary">
                 <div class="bit">
