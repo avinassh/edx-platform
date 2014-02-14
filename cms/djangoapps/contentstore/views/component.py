@@ -313,10 +313,10 @@ def unit_handler(request, tag=None, package_id=None, branch=None, version_guid=N
 @login_required
 def container_handler(request, tag=None, package_id=None, branch=None, version_guid=None, block=None):
     """
-    The restful handler for unit-specific requests.
+    The restful handler for container xblock requests.
 
     GET
-        html: return html page for editing a unit
+        html: returns the HTML page for editing a container
         json: not currently supported
     """
     if 'text/html' in request.META.get('HTTP_ACCEPT', 'text/html'):
