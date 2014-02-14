@@ -52,9 +52,9 @@ define([ "jquery", "js/spec/create_sinon", "URI", "js/views/xblock", "js/models/
             });
 
             describe("XBlock rendering", function() {
-                var postXBlock;
+                var postXBlockRequest;
 
-                postXBlock = function(requests, resources) {
+                postXBlockRequest = function(requests, resources) {
                     $.ajax({
                         url: "test_url",
                         type: 'GET',
@@ -71,7 +71,7 @@ define([ "jquery", "js/spec/create_sinon", "URI", "js/views/xblock", "js/models/
 
                 it('can render an xblock with no CSS or JavaScript', function() {
                     var requests = create_sinon.requests(this);
-                    postXBlock(requests, []);
+                    postXBlockRequest(requests, []);
                     expect(xblockView.$el.select('.xblock-header')).toBeTruthy();
                 });
 
@@ -80,7 +80,7 @@ define([ "jquery", "js/spec/create_sinon", "URI", "js/views/xblock", "js/models/
                         mockCssText = "// Just a comment",
                         mockCssUrl = "mock.css",
                         headHtml;
-                    postXBlock(requests, [
+                    postXBlockRequest(requests, [
                         ["hash1", { mimetype: "text/css", kind: "text", data: mockCssText }],
                         ["hash2", { mimetype: "text/css", kind: "url", data: mockCssUrl }]
                     ]);
@@ -92,7 +92,7 @@ define([ "jquery", "js/spec/create_sinon", "URI", "js/views/xblock", "js/models/
 
                 it('can render an xblock with required JavaScript', function() {
                     var requests = create_sinon.requests(this);
-                    postXBlock(requests, [
+                    postXBlockRequest(requests, [
                         ["hash3", { mimetype: "application/javascript", kind: "text", data: "window.test = 100;" }]
                     ]);
                     expect(xblockView.$el.select('.xblock-header')).toBeTruthy();
@@ -102,7 +102,7 @@ define([ "jquery", "js/spec/create_sinon", "URI", "js/views/xblock", "js/models/
                 it('can render an xblock with required HTML', function() {
                     var requests = create_sinon.requests(this),
                         mockHeadTag = "<title>Test Title</title>";
-                    postXBlock(requests, [
+                    postXBlockRequest(requests, [
                         ["hash4", { mimetype: "text/html", placement: "head", data: mockHeadTag }]
                     ]);
                     expect(xblockView.$el.select('.xblock-header')).toBeTruthy();
