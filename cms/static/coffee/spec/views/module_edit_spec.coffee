@@ -50,11 +50,11 @@ define ["jquery", "coffee/src/views/module_edit", "js/models/module_info", "xmod
             )
 
           it "renders the module editor", ->
-            expect(@moduleEdit.render).toHaveBeenCalled()
+            expect(ModuleEdit.prototype.render).toHaveBeenCalled()
 
         describe "render", ->
           beforeEach ->
-            spyOn(@moduleEdit, 'loadDisplay')
+            spyOn(@moduleEdit, 'initializeXBlock')
             spyOn(@moduleEdit, 'delegateEvents')
             spyOn($.fn, 'append')
             spyOn($, 'getScript')
@@ -82,7 +82,7 @@ define ["jquery", "coffee/src/views/module_edit", "js/models/module_info", "xmod
                 Accept: 'application/x-fragment+json'
               success: jasmine.any(Function)
             )
-            expect(@moduleEdit.loadDisplay).toHaveBeenCalled()
+            expect(@moduleEdit.initializeXBlock).toHaveBeenCalled()
             expect(@moduleEdit.delegateEvents).toHaveBeenCalled()
 
           it "loads inline css from fragments", ->
@@ -112,12 +112,3 @@ define ["jquery", "coffee/src/views/module_edit", "js/models/module_info", "xmod
               ]
             )
             expect($('head').append.callCount).toBe(count)
-
-        describe "loadDisplay", ->
-          beforeEach ->
-            spyOn(XBlock, 'initializeBlock')
-            @moduleEdit.loadDisplay()
-
-          it "loads the .xmodule-display inside the module editor", ->
-            expect(XBlock.initializeBlock).toHaveBeenCalled()
-            expect(XBlock.initializeBlock.mostRecentCall.args[0]).toBe($('.xblock-student_view'))

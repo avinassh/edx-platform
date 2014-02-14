@@ -45,6 +45,14 @@ define(["jquery", "underscore", "backbone", "js/utils/handle_iframe_binding", "x
             },
 
             /**
+             * Initializes the XBlock that has been rendered within the specified element.
+             * @param element The wrapper element that contains the XBlock
+             */
+            initializeXBlock: function(element) {
+                XBlock.initializeBlock(element.find('.xblock-student_view'));
+            },
+
+            /**
              * Renders an xblock fragment into the specifed element. The fragment has two attributes:
              *   html: the HTML to be rendered
              *   resources: any JavaScript or CSS resources that the HTML depends upon
@@ -79,7 +87,7 @@ define(["jquery", "underscore", "backbone", "js/utils/handle_iframe_binding", "x
                                 $.getScript(resource.data);
                             }
                         } else if (resource.mimetype === "text/html") {
-                            if (resource.kind === "head") {
+                            if (resource.placement === "head") {
                                 head.append(resource.data);
                             }
                         }
@@ -93,10 +101,7 @@ define(["jquery", "underscore", "backbone", "js/utils/handle_iframe_binding", "x
                     resource = resources[i];
                     applyResource(resource);
                 }
-                xblockElement = element.find('.xblock-student_view');
-                if (xblockElement.length > 0) {
-                    XBlock.initializeBlock(xblockElement);
-                }
+                this.initializeXBlock(element);
                 return this.delegateEvents();
             }
         });

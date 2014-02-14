@@ -86,8 +86,7 @@ define(["jquery", "underscore", "js/views/baseview", "js/utils/handle_iframe_bin
                         resources: resources
                     });
                     expect(baseView.$el.select('.xblock-header')).toBeTruthy();
-                }
-
+                };
 
                 beforeEach(function () {
                     baseView = new BaseView();
@@ -95,17 +94,7 @@ define(["jquery", "underscore", "js/views/baseview", "js/utils/handle_iframe_bin
 
                 it('can render an xblock with no CSS or JavaScript', function() {
                     var requests = create_sinon.requests(this);
-                    $.ajax({
-                        url: "test_url",
-                        type: 'GET',
-                        success: function(fragment) {
-                            baseView.renderXBlockFragment(fragment, this.$el);
-                        }
-                    });
-                    respondWithMockXBlockFragment(requests, {
-                        html: mockXBlockHtml,
-                        resources: []
-                    });
+                    postXBlock(requests, []);
                     expect(baseView.$el.select('.xblock-header')).toBeTruthy();
                 });
 
@@ -114,65 +103,33 @@ define(["jquery", "underscore", "js/views/baseview", "js/utils/handle_iframe_bin
                         mockCssText = "// Just a comment",
                         mockCssUrl = "mock.css",
                         headHtml;
-                    $.ajax({
-                        url: "test_url",
-                        type: 'GET',
-                        success: function(fragment) {
-                            baseView.renderXBlockFragment(fragment, this.$el);
-                        }
-                    });
-                    respondWithMockXBlockFragment(requests, {
-                        html: mockXBlockHtml,
-                        resources: [
-                            [
-                                "1",
-                                {
-                                    mimetype: "text/css",
-                                    kind: "text",
-                                    data: mockCssText
-                                }
-                            ],
-                            [
-                                "2",
-                                {
-                                    mimetype: "text/css",
-                                    kind: "url",
-                                    data: mockCssUrl
-                                }
-                            ]
-                        ]
-                    });
+                    postXBlock(requests, [
+                        ["hash1", { mimetype: "text/css", kind: "text", data: mockCssText }],
+                        ["hash2", { mimetype: "text/css", kind: "url", data: mockCssUrl }]
+                    ]);
                     expect(baseView.$el.select('.xblock-header')).toBeTruthy();
                     headHtml = $('head').html();
                     expect(headHtml).toContain(mockCssText);
                     expect(headHtml).toContain(mockCssUrl);
                 });
 
-
                 it('can render an xblock with required JavaScript', function() {
                     var requests = create_sinon.requests(this);
-                    $.ajax({
-                        url: "test_url",
-                        type: 'GET',
-                        success: function(fragment) {
-                            baseView.renderXBlockFragment(fragment, this.$el);
-                        }
-                    });
-                    respondWithMockXBlockFragment(requests, {
-                        html: mockXBlockHtml,
-                        resources: [
-                            [
-                                "3",
-                                {
-                                    mimetype: "application/javascript",
-                                    kind: "text",
-                                    data: "window.test = 100;"
-                                }
-                            ]
-                        ]
-                    });
+                    postXBlock(requests, [
+                        ["hash3", { mimetype: "application/javascript", kind: "text", data: "window.test = 100;" }]
+                    ]);
                     expect(baseView.$el.select('.xblock-header')).toBeTruthy();
                     expect(window.test).toBe(100);
+                });
+
+                it('can render an xblock with required HTML', function() {
+                    var requests = create_sinon.requests(this),
+                        mockHeadTag = "<title>Test Title</title>";
+                    postXBlock(requests, [
+                        ["hash4", { mimetype: "text/html", placement: "head", data: mockHeadTag }]
+                    ]);
+                    expect(baseView.$el.select('.xblock-header')).toBeTruthy();
+                    expect($('head').html()).toContain(mockHeadTag);
                 });
             });
         });

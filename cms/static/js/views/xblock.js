@@ -4,10 +4,6 @@ define(["domReady", "jquery", "underscore", "gettext", "js/views/baseview"],
         var XBlockView = BaseView.extend({
             // takes XBlockInfo as a model
 
-            events: {
-                "click .expand-collapse": "toggleExpandCollapse"
-            },
-
             initialize: function() {
                 BaseView.prototype.initialize.call(this);
             },
