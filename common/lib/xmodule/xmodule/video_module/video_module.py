@@ -59,12 +59,6 @@ class VideoFields(object):
         scope=Scope.user_state,
         default=datetime.timedelta(seconds=0)
     )
-    show_captions = Boolean(
-        help="This controls whether or not captions are shown by default.",
-        display_name="Show Transcript",
-        scope=Scope.settings,
-        default=True
-    )
     # TODO: This should be moved to Scope.content, but this will
     # require data migration to support the old video module.
     youtube_id_1_0 = String(
@@ -138,9 +132,28 @@ class VideoFields(object):
     )
     sub = String(
         help="The name of the timed transcript track (for non-Youtube videos).",
-        display_name="HTML5 Transcript",
+        display_name="Transcript (primary)",
         scope=Scope.settings,
-        default="OEoXaMPEzfM"
+        default=""
+    )
+    show_captions = Boolean(
+        help="This controls whether or not captions are shown by default.",
+        display_name="Transcript Display",
+        scope=Scope.settings,
+        default=True
+    )
+    # Data format: {'de': 'german_translation', 'uk': 'ukrainian_translation'}
+    transcripts = Dict(
+        help="Add additional transcripts in other languages",
+        display_name="Transcript Translations",
+        scope=Scope.settings,
+        default={}
+    )
+    transcript_language = String(
+        help="Preferred language for transcript",
+        display_name="Preferred language for transcript",
+        scope=Scope.preferences,
+        default="en"
     )
     speed = Float(
         help="The last speed that was explicitly set by user for the video.",
@@ -150,20 +163,6 @@ class VideoFields(object):
         help="Default speed in cases when speed wasn't explicitly for specific video",
         scope=Scope.preferences,
         default=1.0
-    )
-    # Data format: {de': 'german_translation', 'ua': 'ukrainian_translation'}
-    transcripts = Dict(
-        help="Additional translations for transcript",
-        display_name="Additional translations for transcript",
-        scope=Scope.settings,
-        default={}
-    )
-
-    transcript_language = String(
-        help="Preferred language for transcript",
-        display_name="Preferred language for transcript",
-        scope=Scope.preferences,
-        default="en"
     )
 
 
@@ -253,11 +252,11 @@ class VideoModule(VideoFields, XModule):
         else:
             # this for the case, when for currently selected video,
             # there are no translations and English subtitles are not set by instructor.
-            transcript_language = json.dumps(None)
+            transcript_language = 'null'
 
         languages = {i[0]: i[1] for i in settings.ALL_LANGUAGES}
         # OrderedDict for easy testing of rendered context in tests
-        transcript_languages = OrderedDict({k: languages[k] for k in self.transcripts})
+        transcript_languages = OrderedDict((k, languages[k]) for k in self.transcripts)
         if self.sub:
             transcript_languages.update({'en': 'English'})
 

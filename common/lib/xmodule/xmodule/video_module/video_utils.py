@@ -18,5 +18,3 @@ def create_youtube_string(module):
                     in zip(youtube_speeds, youtube_ids)
                     if pair[1]]
                 )
-
-

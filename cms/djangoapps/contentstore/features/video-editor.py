@@ -39,14 +39,14 @@ def correct_video_settings(_step):
         ['Video URL', 'http://youtu.be/OEoXaMPEzfM, , ', False],
 
         # advanced
-        ['Additional translations for transcript', '', False],
         ['Display Name', 'Video', False],
         ['Download Transcript', '', False],
         ['End Time', '00:00:00', False],
-        ['HTML5 Transcript', 'OEoXaMPEzfM', False],
-        ['Show Transcript', 'True', False],
         ['Start Time', '00:00:00', False],
+        ['Transcript (primary)', '', False],
+        ['Transcript Display', 'True', False],
         ['Transcript Download Allowed', 'False', False],
+        ['Transcript Translations', '', False],
         ['Video Download Allowed', 'False', False],
         ['Video Sources', '', False],
         ['Youtube ID', 'OEoXaMPEzfM', False],

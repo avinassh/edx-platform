@@ -5,7 +5,6 @@ from mock import patch, PropertyMock
 import os
 import tempfile
 import textwrap
-from functools import partial
 import json
 from webob import Request
 
@@ -139,7 +138,7 @@ class TestVideoNonYouTube(TestVideo):
             'transcript_languages' : '{"en": "English"}',
             'transcript_translation_url': self.item_descriptor.xmodule_runtime.handler_url(
                 self.item_descriptor, 'transcript'
-            ).rstrip('/?    ') + '/translation',
+            ).rstrip('/?') + '/translation',
         }
 
         self.assertEqual(
@@ -545,7 +544,7 @@ class TestVideoHandlers(TestVideo):
     def test_translaton_en_success(self):
         subs = {"start": [10,], "end": [100,], "text": [ "Hi, welcome to Edx.",]}
         good_sjson = _create_file(json.dumps(subs))
-        _upload_file(good_sjson, self.item_descriptor.location)
+        _upload_sjson_file(good_sjson, self.item_descriptor.location)
         subs_id = _get_subs_id(good_sjson.name)
 
         # to get instance
@@ -565,7 +564,7 @@ class TestVideoHandlers(TestVideo):
             u'\u041f\u0440\u0438\u0432\u0456\u0442, edX \u0432\u0456\u0442\u0430\u0454 \u0432\u0430\u0441.'
         ]}
         self.non_en_file.seek(0)
-        _upload_srt_file(self.non_en_file, self.item_descriptor.location, os.path.split(self.non_en_file.name)[1])
+        _upload_file(self.non_en_file, self.item_descriptor.location, os.path.split(self.non_en_file.name)[1])
         subs_id = _get_subs_id(self.non_en_file.name)
 
         # to get instance
@@ -586,7 +585,7 @@ class TestVideoHandlers(TestVideo):
             u'\u041f\u0440\u0438\u0432\u0456\u0442, edX \u0432\u0456\u0442\u0430\u0454 \u0432\u0430\u0441.'
         ]}
         self.non_en_file.seek(0)
-        _upload_srt_file(self.non_en_file, self.item_descriptor.location, os.path.split(self.non_en_file.name)[1])
+        _upload_file(self.non_en_file, self.item_descriptor.location, os.path.split(self.non_en_file.name)[1])
         subs_id = _get_subs_id(self.non_en_file.name)
         # to get instance
 
@@ -662,7 +661,7 @@ class TestVideoGetTranscriptsMethod(TestVideo):
                 }
             """))
 
-        _upload_file(good_sjson, self.item_descriptor.location)
+        _upload_sjson_file(good_sjson, self.item_descriptor.location)
         item.sub = _get_subs_id(good_sjson.name)
         text = item.get_transcript('en')
         expected_text = textwrap.dedent("""\
@@ -691,7 +690,7 @@ class TestVideoGetTranscriptsMethod(TestVideo):
 
         good_sjson = _create_file(content='bad content')
 
-        _upload_file(good_sjson, self.item_descriptor.location)
+        _upload_sjson_file(good_sjson, self.item_descriptor.location)
         item.sub = _get_subs_id(good_sjson.name)
 
         with self.assertRaises(ValueError):
@@ -714,7 +713,7 @@ class TestVideoGetTranscriptsMethod(TestVideo):
                 }
             """)
 
-        _upload_file(good_sjson, self.item_descriptor.location)
+        _upload_sjson_file(good_sjson, self.item_descriptor.location)
         item.sub = _get_subs_id(good_sjson.name)
 
         with self.assertRaises(KeyError):
@@ -745,37 +744,16 @@ def _create_file(content=''):
     sjson_file.seek(0)
     return sjson_file
 
-def _upload_file(file, location, default_filename='subs_{}.srt.sjson'):
+def _upload_sjson_file(file, location, default_filename='subs_{}.srt.sjson'):
     filename = default_filename.format(_get_subs_id(file.name))
-    mime_type = file.content_type
+    _upload_file(file, location, filename)
 
-    content_location = StaticContent.compute_location(
-        location.org, location.course, filename
-    )
-
-    sc_partial = partial(StaticContent, content_location, filename, mime_type)
-
-    content = sc_partial(file.read())
-
-    (thumbnail_content, thumbnail_location) = contentstore().generate_thumbnail(
-        content,
-        tempfile_path=None
-    )
-    del_cached_content(thumbnail_location)
-
-    if thumbnail_content is not None:
-        content.thumbnail_location = thumbnail_location
-
-    contentstore().save(content)
-    del_cached_content(content.location)
-
-def _upload_srt_file(file, location, filename):
+def _upload_file(file, location, filename):
     mime_type = file.content_type
     content_location = StaticContent.compute_location(
         location.org, location.course, filename
     )
-    sc_partial = partial(StaticContent, content_location, filename, mime_type)
-    content = sc_partial(file.read())
+    content = StaticContent(content_location, filename, mime_type, file.read())
     contentstore().save(content)
     del_cached_content(content.location)
 
