@@ -430,11 +430,12 @@ def get_or_create_sjson(item):
 
     `item` is module object.
     """
-    user_subs_id = os.path.splitext(item.transcripts[item.transcript_language])[0]
+    user_filename = item.transcripts[item.transcript_language]
+    user_subs_id = os.path.splitext(user_filename)[0]
     source_subs_id, result_subs_dict = user_subs_id, {1.0: user_subs_id}
     try:
         sjson_transcript = asset(item.location, source_subs_id, item.transcript_language).data
     except (NotFoundError):  # generating sjson from srt
-        generate_sjson_for_all_speeds(item, source_subs_id, result_subs_dict)
+        generate_sjson_for_all_speeds(item, user_filename, result_subs_dict)
     sjson_transcript = asset(item.location, source_subs_id, item.transcript_language).data
     return sjson_transcript
