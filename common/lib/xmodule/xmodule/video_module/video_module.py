@@ -370,7 +370,7 @@ class VideoModule(VideoFields, XModule):
 
         return dispatcher[dispatch](request.GET)
 
-    def download_to_student(self, __):
+    def download_to_student(self, parameters):
         """
         This is called to get transcript file without timecodes to student.
         """
