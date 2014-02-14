@@ -302,7 +302,7 @@ class VideoModule(VideoFields, XModule):
             - ValueError if transcript file is empty or incorrect JSON.
             - KeyError if transcript file has incorrect format.
         """
-        lang = self.transcript_l
+        lang = self.transcript_language
         subs_id = self.sub if lang == 'en' else self.youtube_id_1_0
         data = asset(self.location, subs_id, lang).data
         str_subs = generate_srt_from_sjson(json.loads(data), speed=1.0)
@@ -412,7 +412,7 @@ class VideoModule(VideoFields, XModule):
         """
         This is called to get transcript file for specific language.
 
-        subs_id: str: must be on of:  self.sub or one of youtube_ids.
+        subs_id: str: must be on of: self.sub or one of youtube_ids.
 
         Logic flow:
 
@@ -420,6 +420,10 @@ class VideoModule(VideoFields, XModule):
             if subs_id != self.sub ->  this is youtube case with no subtitles
         If non-english:
 
+
+        Filenames naming:
+            en: subs_videoid.srt.sjson
+            non_en: uk_subs_videoid.srt.sjson
         """
         # for English, youtube and non-youtube, videos are associated with self.sub field
         if self.transcript_language == 'en' and subs_id == self.sub:
@@ -427,8 +431,7 @@ class VideoModule(VideoFields, XModule):
             response.content_type = 'application/json'
             return response
         else:
-            log.debug("transcript_translation is not available for language 'en'.")
-            return Response(status=404)
+            raise TranscriptException("transcript translation is not available for language 'en'.")
 
         # Non-English non-youtube  case:
         # Generate sjson if there is no one, and just give subtitles back.
