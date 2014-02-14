@@ -345,15 +345,8 @@ To fix an answer's location in the list, add ``fixed="true"`` to the ``choice`` 
 Targeted Feedback in a Multiple Choice Problem
 ===============================================
 
-Optionally, you can configure a multiple choice problem so explanation for incorrect answers are automatically shown to students.  You can use these explanations to guide students towards the right answer.  Therefore, targeted feedback is most useful for multiple choice problems for which students are allowed multiple attempts.
+Optionally, you can configure a multiple choice problem so that explanations for incorrect answers are automatically shown to students.  You can use these explanations to guide students towards the right answer.  Therefore, targeted feedback is most useful for multiple choice problems for which students are allowed multiple attempts.
 
-For example, when a student selects an incorrect answer, the an explanation is shown:
-
-IMAGE
-
-You can configure the problem to show targeted feedback through :ref:`Advanced Editor`.
-
-MARKUP OPTIONS?  DIDN'T SEE TESTS FOR IT
 
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 Use the Advanced Editor to Configure Targeted Feedback
@@ -422,7 +415,57 @@ QUESTION -- DO YOU STILL NEED SOLUTION ELEMENT IN THIS SCENARIO?
 Answer Pools in a Multiple Choice Problem
 ===============================================
 
-TBD
+Optionally, you can configure a multiple choice problem so that a random subset of choices are shown to each student. For example, you can add 10 possible choices to the problem, and each student views a set of five choices.
+
+The answer pool must have at least one correct answer, and can have more than one. In each set of choices shown to a student, one correct answer is included. For example, you may configure two correct answers in the set of 10. One of the two correct answers is included in each set a student views.
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Use the Advanced Editor to Configure Targeted Feedback
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+You configure the problem to provide targeted feedback through XML in :ref:`Advanced Editor`.
+
+Follow these XML guidelines:
+
+* In the ``<multiplechoice>`` element, add the ``answer-pool`` attribute, with the numerical value indicating the number of possible answers in the set. For example, ``<multiplechoiceresponse answer-pool="4">``.
+
+* For each correct answer, to the ``<choice>`` element, add an ``explanation-id`` attribute and value that maps to a solution. For example, ``<choice correct="true" explanation-id="iPod">The iPod</choice>``.
+
+* For each ``<solution>`` element, add an ``explanation-id`` attribute and value that maps back to a correct answer. For example, ``<solution explanation-id="iPod">``.
+
+
+For example, for the following multiple choice problem, a student will see four choices, and in each set one of the choices will be one of the two correct ones. The explanation shown for the correct answer is the one with the same explanation ID.
+
+.. code-block:: xml
+
+ <problem>
+   <p>What Apple devices let you carry your digital music library in your pocket?</p>
+   <multiplechoiceresponse answer-pool="4">
+    <choicegroup type="MultipleChoice">
+      <choice correct="false">The iPad</choice>
+      <choice correct="false">Napster</choice>
+      <choice correct="true" explanation-id="iPod">The iPod</choice>
+      <choice correct="false">The vegetable peeler</choice>
+      <choice correct="false">The iMac</choice>
+      <choice correct="true" explanation-id="iPhone">The iPhone</choice>
+    </choicegroup>
+   </multiplechoiceresponse>
+
+    <solutionset>
+        <solution explanation-id="iPod">
+        <div class="detailed-solution">
+            <p>Explanation</p>
+            <p>Yes, the iPod is Apple's portable digital music player.</p>
+        </div>
+        </solution>
+        <solution explanation-id="iPhone">
+        <div class="detailed-solution">
+            <p>Explanation</p>
+            <p>In addition to being a cell phone, the iPhone can store and play your digital music.</p>
+        </div>
+        </solution>
+    </solutionset>
+ </problem>
 
 
 .. _Numerical Input:
