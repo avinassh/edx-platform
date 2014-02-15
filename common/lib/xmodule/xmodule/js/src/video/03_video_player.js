@@ -5,30 +5,16 @@ define(
 'video/03_video_player.js',
 ['video/02_html5_video.js', 'video/00_resizer.js'],
 function (HTML5Video, Resizer) {
-     var dfd = $.Deferred();
+    var dfd = $.Deferred(),
+        VideoPlayer = function (state) {
+            state.videoPlayer = {};
+            _makeFunctionsPublic(state);
+            _initialize(state);
+            // No callbacks to DOM events (click, mousemove, etc.).
 
-    // VideoPlayer() function - what this module "exports".
-    return function (state) {
-
-        state.videoPlayer = {};
-
-        _makeFunctionsPublic(state);
-        _initialize(state);
-        // No callbacks to DOM events (click, mousemove, etc.).
-
-        return dfd.promise();
-    };
-
-    // ***************************************************************
-    // Private functions start here.
-    // ***************************************************************
-
-    // function _makeFunctionsPublic(state)
-    //
-    //     Functions which will be accessible via 'state' object. When called,
-    //     these functions will get the 'state' object as a context.
-    function _makeFunctionsPublic(state) {
-        var methodsDict = {
+            return dfd.promise();
+        },
+        methodsDict = {
             duration: duration,
             handlePlaybackQualityChange: handlePlaybackQualityChange,
             isPlaying: isPlaying,
@@ -51,6 +37,20 @@ function (HTML5Video, Resizer) {
             updatePlayTime: updatePlayTime
         };
 
+    VideoPlayer.prototype = methodsDict;
+
+    // VideoPlayer() function - what this module "exports".
+    return VideoPlayer;
+
+    // ***************************************************************
+    // Private functions start here.
+    // ***************************************************************
+
+    // function _makeFunctionsPublic(state)
+    //
+    //     Functions which will be accessible via 'state' object. When called,
+    //     these functions will get the 'state' object as a context.
+    function _makeFunctionsPublic(state) {
         state.bindTo(methodsDict, state.videoPlayer, state);
     }
 

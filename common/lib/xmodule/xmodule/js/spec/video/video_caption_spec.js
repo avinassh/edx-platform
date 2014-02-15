@@ -109,7 +109,7 @@
 
             });
 
-            describe('language menu', function () {
+            describe('renderLanguages', function () {
                 describe('is rendered', function () {
                     it('if languages more than 1', function () {
                         state = jasmine.initializePlayer();
@@ -443,7 +443,8 @@
                 expect(Caption.hideCaptions).toHaveBeenCalledWith(false);
             });
 
-            msg = 'use cookie to show/hide captions if they have not loaded yet';
+            msg = 'use cookie to show/hide captions if they have not been ' +
+                    'loaded yet';
             it(msg, function () {
                 Caption.loaded = false;
                 state.hide_captions = false;
@@ -475,7 +476,7 @@
             });
 
             msg = 'on success: change language on touch devices when ' +
-                 'captions have not rendered yet';
+                 'captions have not been rendered yet';
             it(msg, function () {
                 state.isTouch = true;
                 Caption.loaded = true;

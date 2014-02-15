@@ -238,13 +238,13 @@ function () {
             this.videoCaption.hideCaptions(this.hide_captions);
         }
 
-        if (this.fetchXHR && this.fetchXHR.abort) {
-            this.fetchXHR.abort();
+        if (this.videoCaption.fetchXHR && this.videoCaption.fetchXHR.abort) {
+            this.videoCaption.fetchXHR.abort();
         }
 
         // Fetch the captions file. If no file was specified, or if an error
         // occurred, then we hide the captions panel, and the "CC" button
-        this.fetchXHR = $.ajaxWithPrefix({
+        this.videoCaption.fetchXHR = $.ajaxWithPrefix({
             url: self.config.transcriptTranslationUrl,
             notifyOnError: false,
             data: {
