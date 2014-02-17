@@ -113,12 +113,17 @@ function () {
         Caption.container = this.el.find('.lang');
         Caption.hideSubtitlesEl = this.el.find('a.hide-subtitles');
 
-        if (languages && _.keys(languages).length > 1) {
-            Caption.showLanguageMenu = true;
-            Caption.renderLanguages();
-        }
+        if (_.keys(languages).length) {
+            if (_.keys(languages).length > 1) {
+                Caption.showLanguageMenu = true;
+                Caption.renderLanguages();
+            }
 
-        if (!Caption.fetchCaption()) {
+            if (!Caption.fetchCaption()) {
+                Caption.hideCaptions(true);
+                Caption.hideSubtitlesEl.hide();
+            }
+        } else {
             Caption.hideCaptions(true);
             Caption.hideSubtitlesEl.hide();
         }

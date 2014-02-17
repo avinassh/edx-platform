@@ -165,11 +165,14 @@ function (Initialize) {
         });
 
         describe('getCurrentLanguage', function () {
+            var msg;
+
             beforeEach(function () {
                 state.config = {};
                 state.config.transcriptLanguages = {
                     'de': 'German',
                     'en': 'English',
+                    'uk': 'Ukrainian',
                 };
             });
 
@@ -181,13 +184,36 @@ function (Initialize) {
                 expect(expected).toBe('de');
             });
 
-            var msg = 'returns `en`, if language isn\'t available for the video';
+            msg = 'returns `en`, if language isn\'t available for the video';
             it (msg, function () {
                 var expected;
 
                 state.lang = 'zh';
                 expected = Initialize.prototype.getCurrentLanguage.call(state);
                 expect(expected).toBe('en');
+            });
+
+            msg = 'returns any available language, if current and `en` ' +
+                    'languages aren\'t available for the video';
+            it (msg, function () {
+                var expected;
+
+                state.lang = 'zh';
+                state.config.transcriptLanguages = {
+                    'de': 'German',
+                    'uk': 'Ukrainian',
+                };
+                expected = Initialize.prototype.getCurrentLanguage.call(state);
+                expect(expected).toBe('uk');
+            });
+
+            it ('returns `null`, if transcript unavailable', function () {
+                var expected;
+
+                state.lang = 'zh';
+                state.config.transcriptLanguages = {};
+                expected = Initialize.prototype.getCurrentLanguage.call(state);
+                expect(expected).toBeNull();
             });
         });
 
