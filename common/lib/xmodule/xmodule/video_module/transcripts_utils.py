@@ -378,8 +378,8 @@ def manage_video_subtitles_save(old_item, new_item, user):
         # 2.
         old_langs, new_langs = set(old_item.transcripts), set(new_item.transcripts)
 
-        if self.transcript_language not in new_langs: # 2c
-            self.transcript_language = 'en'
+        if new_item.transcript_language not in new_langs: # 2c
+            new_item.transcript_language = 'en'
             save_module(new_item, user)
 
         for lang in old_langs.different(new_langs): # 2b
