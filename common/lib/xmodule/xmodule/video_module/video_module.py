@@ -382,8 +382,8 @@ class VideoModule(VideoFields, XModule):
                 b) try to find sjson by subs_id and return if sucessful
                 c) otherwise generate sjson from srt and return it.
             if youtube:
-                a) try to find sjson by subs_id and return if sucessful
-                b) generate sjson from srt for all youtube speeds
+                b) try to find sjson by subs_id and return if sucessful
+                c) generate sjson from srt for all youtube speeds
 
         Filenames naming:
             en: subs_videoid.srt.sjson
