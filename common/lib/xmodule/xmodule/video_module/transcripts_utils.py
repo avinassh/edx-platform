@@ -352,7 +352,6 @@ def manage_video_subtitles_save(old_metadata, new_metadata, item, user):
     If some of SRT file names are updated, we need to
         a) regenerate sjson subtitles for all video ids from new SRTs
         b) delete sjson translation for those languages, which were removed from transcripts.
-        c) if default language was in removed subtitles, it should be changed to 'en'
     Note: we are not deleting old SRT files to give user more flexibility.
 
     """
@@ -380,10 +379,7 @@ def manage_video_subtitles_save(old_metadata, new_metadata, item, user):
             )
 
         # 2.
-        old_langs, new_langs = set(old_metadata['transcripts']), set(new_metadata['transcripts'])
-        if item.transcript_language not in new_langs: # 2c
-            item.transcript_language = 'en'
-            # save_module(item, user)
+        old_langs, new_langs = set(cc), set(new_metadata['transcripts'])
 
         for lang in old_langs.difference(new_langs): # 2b
                 for video_id in possible_video_id_list:

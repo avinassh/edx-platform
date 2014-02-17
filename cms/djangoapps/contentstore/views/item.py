@@ -222,7 +222,7 @@ def _save_item(request, usage_loc, item_location, data=None, children=None, meta
     except InvalidLocationError:
         log.error("Can't find item by location.")
         return JsonResponse({"error": "Can't find item by location: " + str(item_location)}, 404)
-
+    import ipdb; ipdb.set_trace()
     old_metadata = own_metadata(existing_item)
 
     if publish:
