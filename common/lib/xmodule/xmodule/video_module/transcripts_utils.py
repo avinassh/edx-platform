@@ -400,10 +400,10 @@ def youtube_speed_dict(item):
     """
     Returns {speed: youtube_ids, ...} dict for existing youtube_ids
     """
-        yt_ids = [item.youtube_id_0_75, item.youtube_id_1_0, item.youtube_id_1_25, item.youtube_id_1_5]
-        yt_speeds = [0.75, 1.00, 1.25, 1.50]
-        youtube_ids = {p[0]: p[1] for p in zip(yt_ids, yt_speeds) if p[0]}
-        return youtube_ids
+    yt_ids = [item.youtube_id_0_75, item.youtube_id_1_0, item.youtube_id_1_25, item.youtube_id_1_5]
+    yt_speeds = [0.75, 1.00, 1.25, 1.50]
+    youtube_ids = {p[0]: p[1] for p in zip(yt_ids, yt_speeds) if p[0]}
+    return youtube_ids
 
 def subs_filename(subs_id, lang='en'):
     """
