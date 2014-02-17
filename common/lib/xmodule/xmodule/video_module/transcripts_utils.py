@@ -191,11 +191,14 @@ def download_youtube_subs(youtube_subs, item, settings, i18n):
         )
 
 
-def remove_subs_from_store(subs_id, item):
+def remove_subs_from_store(subs_id, item, lang):
     """
     Remove from store, if transcripts content exists.
     """
-    filename = 'subs_{0}.srt.sjson'.format(subs_id)
+    if lang != 'en':
+        filename = '{0}_subs_{1}.srt.sjson'.format(lang, subs_id)
+    else:
+        filename = 'subs_{0}.srt.sjson'.format(subs_id)
     content_location = StaticContent.compute_location(
         item.location.org, item.location.course, filename
     )
@@ -333,6 +336,7 @@ def manage_video_subtitles_save(old_item, new_item, user):
 
     If value of `sub` field of `new_item` is cleared, transcripts should be removed.
 
+    # 1.
     If value of `sub` field of `new_item` is different from values of video fields of `new_item`,
     and `new_item.sub` file is present, then code in this function creates copies of
     `new_item.sub` file with new names. That names are equal to values of video fields of `new_item`
@@ -340,7 +344,13 @@ def manage_video_subtitles_save(old_item, new_item, user):
     This whole action ensures that after user changes video fields, proper `sub` files, corresponding
     to new values of video fields, will be presented in system.
 
-    old_item is not used here, but is added for future changes.
+    # 2.
+    If some of SRT file names are updated, we need to
+        a) regenerate sjson subtitles for all video ids from new SRTs
+        b) delete sjson translation for those languages, which were removed from transcripts.
+        c) if default language was in removed subtitles, it should be changed to 'en'
+    Note: we are not deleting old SRT files to give user more flexibility.
+
     """
 
     # 1.
@@ -365,6 +375,35 @@ def manage_video_subtitles_save(old_item, new_item, user):
                 sub_name, video_id
             )
 
+        # 2.
+        old_langs, new_langs = set(old_item.transcripts), set(new_item.transcripts)
+
+        if self.transcript_language not in new_langs: # 2c
+            self.transcript_language = 'en'
+            save_module(new_item, user)
+
+        for lang in old_langs.different(new_langs): # 2b
+                for video_id in possible_video_id_list:
+                    if video_id:
+                        remove_subs_from_store(video_id, new_item, lang)
+
+        for lang in new_langs.intersection(old_langs): # 2a
+            if old_item.transcripts[lang] != new_item.transcripts[lang]:
+                generate_sjson_for_all_speeds(
+                    new_item,
+                    new_item.transcripts[lang],
+                    youtube_speed_dict(item)
+                    )
+
+
+def youtube_speed_dict(item):
+    """
+    Returns {speed: youtube_ids, ...} dict for existing youtube_ids
+    """
+        yt_ids = [item.youtube_id_0_75, item.youtube_id_1_0, item.youtube_id_1_25, item.youtube_id_1_5]
+        yt_speeds = [0.75, 1.00, 1.25, 1.50]
+        youtube_ids = {p[0]: p[1] for p in zip(yt_ids, yt_speeds) if p[0]}
+        return youtube_ids
 
 def subs_filename(subs_id, lang='en'):
     """
