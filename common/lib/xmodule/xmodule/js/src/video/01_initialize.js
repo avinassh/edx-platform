@@ -721,8 +721,18 @@ function (VideoPlayer, VideoStorage) {
     }
 
     function getCurrentLanguage() {
-        if (!_.contains(_.keys(this.config.transcriptLanguages), this.lang)) {
-            this.lang = 'en';
+        var keys = _.keys(this.config.transcriptLanguages);
+
+        if (keys.length) {
+            if (!_.contains(keys, this.lang)) {
+                if (_.contains(keys, 'en')) {
+                    this.lang = 'en';
+                } else {
+                    this.lang = keys.pop();
+                }
+            }
+        } else {
+            return null;
         }
 
         return this.lang;
