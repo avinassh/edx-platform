@@ -379,7 +379,7 @@ def manage_video_subtitles_save(old_metadata, new_metadata, item, user):
             )
 
         # 2.
-        old_langs, new_langs = set(cc), set(new_metadata['transcripts'])
+        old_langs, new_langs = set(old_metadata['transcripts']), set(new_metadata['transcripts'])
 
         for lang in old_langs.difference(new_langs): # 2b
                 for video_id in possible_video_id_list:

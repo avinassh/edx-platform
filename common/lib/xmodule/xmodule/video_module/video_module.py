@@ -330,7 +330,6 @@ class VideoModule(VideoFields, XModule):
         if lang not in ['en'] + self.transcripts.keys():
             log.info("Video: transcript facilities are not available for given language.")
             return Response(status=404)
-        import ipdb; ipdb.set_trace()
         if lang != self.transcript_language:
             self.transcript_language = lang
 
@@ -652,7 +651,6 @@ class VideoDescriptor(VideoFields, TabsEditingDescriptor, EmptyDataRawDescriptor
         transcripts = xml.findall('transcript')
         if transcripts:
             field_data['transcripts'] = {tr.get('language'): tr.get('src') for tr in transcripts}
-            import ipdb; ipdb.set_trace()
 
         for attr, value in xml.items():
             if attr in compat_keys:
