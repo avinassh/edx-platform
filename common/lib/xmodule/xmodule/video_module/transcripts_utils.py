@@ -380,9 +380,9 @@ def manage_video_subtitles_save(old_item, new_item, user):
 
         if new_item.transcript_language not in new_langs: # 2c
             new_item.transcript_language = 'en'
-            save_module(new_item, user)
+            # save_module(new_item, user)
 
-        for lang in old_langs.different(new_langs): # 2b
+        for lang in old_langs.difference(new_langs): # 2b
                 for video_id in possible_video_id_list:
                     if video_id:
                         remove_subs_from_store(video_id, new_item, lang)
