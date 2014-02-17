@@ -191,7 +191,7 @@ def download_youtube_subs(youtube_subs, item, settings, i18n):
         )
 
 
-def remove_subs_from_store(subs_id, item, lang):
+def remove_subs_from_store(subs_id, item, lang='en'):
     """
     Remove from store, if transcripts content exists.
     """
