@@ -406,7 +406,8 @@ class VideoModule(VideoFields, XModule):
             generate_sjson_for_all_speeds(
                 self,
                 self.transcripts[self.transcript_language],
-                {speed: subs_id for subs_id, speed in youtube_ids.iteritems()}
+                {speed: subs_id for subs_id, speed in youtube_ids.iteritems()},
+                self.transcript_language
             )
         sjson_transcript = asset(self.location, subs_id, self.transcript_language).data
         return sjson_transcript

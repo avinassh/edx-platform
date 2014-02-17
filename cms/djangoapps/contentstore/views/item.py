@@ -223,6 +223,8 @@ def _save_item(request, usage_loc, item_location, data=None, children=None, meta
         log.error("Can't find item by location.")
         return JsonResponse({"error": "Can't find item by location: " + str(item_location)}, 404)
 
+    old_metadata = own_metadata(existing_item)
+
     if publish:
         if publish == 'make_private':
             _xmodule_recurse(existing_item, lambda i: modulestore().unpublish(i.location))
@@ -271,7 +273,7 @@ def _save_item(request, usage_loc, item_location, data=None, children=None, meta
                     field.write_to(existing_item, value)
 
         if existing_item.category == 'video':
-            manage_video_subtitles_save(existing_item, existing_item, request.user)
+            manage_video_subtitles_save(old_metadata, own_metadata(existing_item), existing_item, request.user)
 
     # commit to datastore
     store.update_item(existing_item, request.user.id)

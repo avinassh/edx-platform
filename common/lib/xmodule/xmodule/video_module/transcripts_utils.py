@@ -78,7 +78,6 @@ def save_subs_to_store(subs, subs_id, item, language='en'):
         filename = 'subs_{0}.srt.sjson'.format(subs_id)
     else:
         filename = '{0}_subs_{1}.srt.sjson'.format(language, subs_id)
-
     content_location = StaticContent.compute_location(
         item.location.org, item.location.course, filename
     )
@@ -328,13 +327,18 @@ def get_html5_ids(html5_sources):
     return html5_ids
 
 
-def manage_video_subtitles_save(old_item, new_item, user):
+def manage_video_subtitles_save(old_metadata, new_metadata, item, user):
     """
     Does some specific things, that can be done only on save.
 
     Video player item has some video fields: HTML5 ones and Youtube one.
 
     If value of `sub` field of `new_item` is cleared, transcripts should be removed.
+
+    `item` is video module instance with updated values of fields,
+    but actually have not been saved to store yet.
+
+    `old_metadata` and `new_metadata` are values of XFields before and at the moment, respectively.
 
     # 1.
     If value of `sub` field of `new_item` is different from values of video fields of `new_item`,
@@ -354,19 +358,19 @@ def manage_video_subtitles_save(old_item, new_item, user):
     """
 
     # 1.
-    html5_ids = get_html5_ids(new_item.html5_sources)
-    possible_video_id_list = [new_item.youtube_id_1_0] + html5_ids
-    sub_name = new_item.sub
+    html5_ids = get_html5_ids(item.html5_sources)
+    possible_video_id_list = [item.youtube_id_1_0] + html5_ids
+    sub_name = item.sub
     for video_id in possible_video_id_list:
         if not video_id:
             continue
         if not sub_name:
-            remove_subs_from_store(video_id, new_item)
+            remove_subs_from_store(video_id, item)
             continue
         # copy_or_rename_transcript changes item.sub of module
         try:
             # updates item.sub with `video_id`, if it is successful.
-            copy_or_rename_transcript(video_id, sub_name, new_item, user=user)
+            copy_or_rename_transcript(video_id, sub_name, item, user=user)
         except NotFoundError:
             # subtitles file `sub_name` is not presented in the system. Nothing to copy or rename.
             log.debug(
@@ -376,23 +380,23 @@ def manage_video_subtitles_save(old_item, new_item, user):
             )
 
         # 2.
-        old_langs, new_langs = set(old_item.transcripts), set(new_item.transcripts)
-
-        if new_item.transcript_language not in new_langs: # 2c
-            new_item.transcript_language = 'en'
-            # save_module(new_item, user)
+        old_langs, new_langs = set(old_metadata['transcripts']), set(new_metadata['transcripts'])
+        if item.transcript_language not in new_langs: # 2c
+            item.transcript_language = 'en'
+            # save_module(item, user)
 
         for lang in old_langs.difference(new_langs): # 2b
                 for video_id in possible_video_id_list:
                     if video_id:
-                        remove_subs_from_store(video_id, new_item, lang)
+                        remove_subs_from_store(video_id, item, lang)
 
         for lang in new_langs.intersection(old_langs): # 2a
-            if old_item.transcripts[lang] != new_item.transcripts[lang]:
+            if old_metadata['transcripts'][lang] != new_metadata['transcripts'][lang]:
                 generate_sjson_for_all_speeds(
-                    new_item,
-                    new_item.transcripts[lang],
-                    youtube_speed_dict(item)
+                    item,
+                    item.transcripts[lang],
+                    {speed: subs_id for subs_id, speed in  youtube_speed_dict(item).iteritems()},
+                    lang,
                     )
 
 
@@ -440,9 +444,9 @@ def asset(location, subs_id, lang='en'):
     )
 
 
-def generate_sjson_for_all_speeds(item, user_filename, result_subs_dict):
+def generate_sjson_for_all_speeds(item, user_filename, result_subs_dict, lang):
     """
-    Generates sjson from srt.
+    Generates sjson from srt for given lang.
 
     `item` is module object.
     """
@@ -451,12 +455,15 @@ def generate_sjson_for_all_speeds(item, user_filename, result_subs_dict):
     except NotFoundError as e:
         raise TranscriptException("{}: Can't find uploaded transcripts: {}".format(e.message, user_filename))
 
+    if not lang:
+        lang = item.transcript_language
+
     generate_subs_from_source(
         result_subs_dict,
         os.path.splitext(user_filename)[1][1:],
         srt_transcripts.data.decode('utf8'),
         item,
-        item.transcript_language
+        lang
     )
 
 def get_or_create_sjson(item):
@@ -478,6 +485,6 @@ def get_or_create_sjson(item):
     try:
         sjson_transcript = asset(item.location, source_subs_id, item.transcript_language).data
     except (NotFoundError):  # generating sjson from srt
-        generate_sjson_for_all_speeds(item, user_filename, result_subs_dict)
+        generate_sjson_for_all_speeds(item, user_filename, result_subs_dict, item.transcript_language)
     sjson_transcript = asset(item.location, source_subs_id, item.transcript_language).data
     return sjson_transcript
